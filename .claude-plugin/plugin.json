@@ -1,6 +1,6 @@
 {
   "name": "pickme",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "Ask someone else to decide open decisions through a shared HTML page: the requester picks first, the AI recommendation is marked, the decider makes the final pick, and the result comes back to the agent.",
   "author": {
     "name": "lcalmsky",
