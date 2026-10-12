@@ -1051,7 +1051,8 @@
       abCount.textContent = complete ? t(submitMode ? "completeBarSubmit" : "completeBar") : tf("progressSelected", { total: total, done: done });
       abCount.classList.toggle("ready", complete);
       abWarn.textContent = unselected > 0 ? tf("unselectedShort", { n: unselected }) : "";
-      abBtn.classList.toggle("primary", complete);
+      // 전송 버튼이 있으면 그쪽이 주 버튼이라 복사 버튼은 강조하지 않는다
+      abBtn.classList.toggle("primary", complete && !submitMode);
       // 복원 직후(completeSeen === null)의 완료 상태는 알림 없이 그리기만 하고, 미선택이 다시 0 이 된 순간에만 한 번 알린다
       if (completeSeen === false && complete) {
         actionbar.classList.remove("pulse");

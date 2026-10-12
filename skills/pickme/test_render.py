@@ -434,7 +434,8 @@ class RenderTests(unittest.TestCase):
         ready = re.search(r'\.ab-count\.ready\s*\{([^}]*)\}', text)
         self.assertIn("var(--ai)", ready.group(1), "완료 문구는 기존 토큰으로 강조한다")
         # 미선택이 남았을 때와 다 골랐을 때의 버튼 강조가 갈린다
-        self.assertIn('abBtn.classList.toggle("primary", complete);', text)
+        # 전송 버튼이 있는 요청자 페이지에서는 복사 버튼이 주 버튼이 되지 않는다
+        self.assertIn('abBtn.classList.toggle("primary", complete && !submitMode);', text)
         # 완료로 바뀌는 순간에만 한 번 알린다
         self.assertIn("var completeSeen = null;", text)
         self.assertIn("if (completeSeen === false && complete) {", text)
