@@ -1,0 +1,169 @@
+{
+  "meta": {
+    "name": "demo-signup-revamp",
+    "title": "DEMO-12 signup revamp decisions",
+    "version": 1,
+    "created": "2026-10-11",
+    "requester": "Alex",
+    "decider_role": "Designer",
+    "decider": "Sam",
+    "lang": "en",
+    "intro": [
+      "Only the items still open in the signup revamp are collected here: where social login sits, how the consent screen is arranged, and the wording when a signup finishes.",
+      "Each item carries its source and background, and every option says what changes when it is picked. When you are done, use the copy button at the bottom to pass the result on."
+    ],
+    "sources": [
+      {
+        "label": "DEMO-12",
+        "url": "https://example.com/tickets/DEMO-12"
+      },
+      {
+        "label": "DEMO-9",
+        "url": "https://example.com/tickets/DEMO-9"
+      }
+    ]
+  },
+  "decisions": [
+    {
+      "id": "d1",
+      "title": "Should social login sit on the first screen",
+      "question": "Decide whether the first signup screen shows email entry and social login together.",
+      "origin": "prd",
+      "sources": [
+        {
+          "label": "DEMO-9 PRD Q-37",
+          "url": "https://example.com/tickets/DEMO-9"
+        }
+      ],
+      "background": [
+        "Half of the drop-off happens on the first screen. Social login needs no typing, but it adds a step later that links the account to an email one.",
+        "Putting social login first shortens the time to a finished signup; keeping only email signup means no account-linking screen has to be built."
+      ],
+      "parts": [
+        {
+          "id": "d1",
+          "options": [
+            {
+              "id": "a",
+              "label": "Keep email signup only",
+              "effect": "No account-linking screen, but a signup takes longer to finish"
+            },
+            {
+              "id": "b",
+              "label": "Put social login first",
+              "effect": "Signup gets faster, but an account-linking screen ships with it"
+            },
+            {
+              "id": "c",
+              "label": "Put social login below email",
+              "effect": "Email signup leads, but social login is easier to miss"
+            }
+          ],
+          "recommended": "b",
+          "rationale": "Cutting the time to a finished signup pays off, and the account-linking screen is built once."
+        }
+      ],
+      "copy_blocks": [
+        {
+          "label": "Draft message",
+          "text": "Some items in the DEMO-12 signup revamp are still open.\n1) Whether social login goes on the first screen\n2) Which screen the consent items are collected on\nPlease pick them on the page below."
+        }
+      ]
+    },
+    {
+      "id": "d2",
+      "title": "Which screen collects the consent items",
+      "question": "Decide whether the required and optional consent items sit on one screen or are split across the flow.",
+      "origin": "session",
+      "sources": [
+        {
+          "label": "Blocked in this session",
+          "url": ""
+        }
+      ],
+      "background": [
+        "This item is not written down anywhere: the screen work stalled here while decision 1 was unresolved.",
+        "One screen shortens the flow, while splitting the items makes the first pass feel lighter."
+      ],
+      "parts": [
+        {
+          "id": "d2",
+          "options": [
+            {
+              "id": "a",
+              "label": "Collect them on the signup screen",
+              "effect": "One step fewer, but the screen looks long at first glance"
+            },
+            {
+              "id": "b",
+              "label": "Split them across the flow",
+              "effect": "Lighter per step, but one more step to finish"
+            }
+          ],
+          "recommended": "a",
+          "rationale": "There are only three required items, so one screen stays short and saves a step.",
+          "allow_custom": true
+        }
+      ]
+    },
+    {
+      "id": "d3",
+      "title": "Wording when signup finishes, and what a failure rolls back",
+      "question": "Decide the wording on the screen after signup and what is rolled back when a signup fails halfway.",
+      "origin": "jira",
+      "sources": [
+        {
+          "label": "DEMO-12 open item",
+          "url": "https://example.com/tickets/DEMO-12"
+        }
+      ],
+      "background": [
+        "The same wording goes into the signup email and the screen, so it is hard to change later. The word \"Start\" already appears on the home screen button.",
+        "A signup that fails halfway leaves some of what was entered behind. Decide whether to keep it for a retry or return to the first screen."
+      ],
+      "parts": [
+        {
+          "id": "d3",
+          "label": "Finish wording",
+          "options": [
+            {
+              "id": "a",
+              "label": "You are all set",
+              "effect": "Does not clash with the home button and says the signup is done"
+            },
+            {
+              "id": "b",
+              "label": "Shall we get started",
+              "effect": "Matches older wording but reads as if signup is not finished"
+            },
+            {
+              "id": "c",
+              "label": "Welcome",
+              "effect": "Short, but says nothing about what to do next"
+            }
+          ],
+          "recommended": "a",
+          "rationale": "It says the signup is done and points at the next step."
+        },
+        {
+          "id": "d3r",
+          "label": "Failure rollback",
+          "options": [
+            {
+              "id": "a",
+              "label": "Return to the first screen",
+              "effect": "No trace of the failed attempt is left behind"
+            },
+            {
+              "id": "b",
+              "label": "Keep it and let the person retry",
+              "effect": "Retrying is quick, but a half-filled state stays behind"
+            }
+          ],
+          "recommended": "b",
+          "rationale": "Keeping what was entered saves retrying people from typing the same values again."
+        }
+      ]
+    }
+  ]
+}
