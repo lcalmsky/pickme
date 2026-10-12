@@ -103,6 +103,7 @@
   .filter input { width: 15px; height: 15px; accent-color: var(--accent); }
 
   /* 본문 */
+  .app { padding: 0 16px; }
   .doc { min-width: 0; padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)); }
   main { margin-top: 28px; }
 
@@ -1060,11 +1061,6 @@
     function setPick(partId, pick) {
       state.picks[partId] = pick;
       animateId = partId;
-      update();
-    }
-
-    function clearPick(partId) {
-      delete state.picks[partId];
       update();
     }
 
