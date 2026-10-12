@@ -25,7 +25,7 @@ Orca 스킬 공유 링크는 게시할 때 올린 파일을 바꿀 수 없는 �
 ## 테스트
 
 ```bash
-python3 -m unittest skills/pickme/test_render.py skills/pickme/test_serve.py
+python3 -m unittest skills/pickme/test_render.py skills/pickme/test_serve.py skills/pickme/test_config.py
 bash skills/pickme/test_deliver.sh
 ```
 

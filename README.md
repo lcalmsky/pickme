@@ -51,6 +51,7 @@ Claude Code 에서 플러그인을 설치합니다.
 | [발행기 훅](#발행-경로) | 사내 공유 호스트가 있으면 발행기를 한 파일 두어 체인 맨 앞에 붙입니다 |
 | [PIN 잠금](#pin-잠금) | 공유 호스트에 올리는 페이지를 4자리 PIN 으로 잠급니다 |
 | [한국어·영어 페이지](#언어) | `meta.lang` 으로 화면 문구와 복사 텍스트의 언어를 고릅니다 |
+| [설정](#설정) | `/pickme setup` 으로 요청자 페이지를 여는 곳과 결정권자 페이지 게시 경로를 정합니다. 게시 경로에 쓰는 스킬이나 CLI 를 말하면 에이전트가 발행기를 만들어 등록합니다 |
 
 ### 결정 페이지
 
@@ -122,9 +123,13 @@ cp -r pickme/skills/pickme ~/.claude/skills/
 
 <p align="center"><img src="docs/designer.png" alt="요청자 단계를 건너뛰고 바로 열린 결정권자 페이지" width="800"></p>
 
+### 설정
+
+`/pickme setup` 은 두 가지를 정합니다. 요청자 페이지를 여는 곳은 `auto`(Orca 안이면 Orca 탭, 아니면 기본 브라우저), `orca`, `browser`, `none` 중에서 고릅니다. 게시 경로는 아무것도 정하지 않으면 기본 경로(Orca 아티팩트, 그다음 Claude 아티팩트)를 쓰고, 게시에 쓰는 스킬이나 CLI 를 말하면 에이전트가 그 문서와 `--help` 를 읽어 발행기를 만들어 등록한 뒤 시험 페이지로 한 번 돌려 봅니다. 설정을 바꾸려면 `/pickme setup` 을 다시 실행합니다.
+
 ### 요청자 단계는 로컬로 엽니다
 
-요청자는 이 컴퓨터에 있는 사용자 자신이라 공유 호스트로 보내지 않습니다. 대신 `serve.py` 가 페이지를 127.0.0.1 로 열고, 페이지의 `요청자 확인` 버튼이 답을 그 서버로 보냅니다. 서버는 답을 파일로 쓰고 끝나므로 복사와 붙여넣기가 필요 없습니다. 버튼이 막히면 페이지 옆의 `결과 복사` 로 예전처럼 붙여넣어도 됩니다.
+요청자는 이 컴퓨터에 있는 사용자 자신이라 공유 호스트로 보내지 않습니다. 대신 `serve.py` 가 페이지를 127.0.0.1 로 열고, 설정에 따라 Orca 탭이나 기본 브라우저로 자동으로 열립니다. 페이지의 `요청자 확인` 버튼이 답을 그 서버로 보내고, 서버는 답을 파일로 쓰고 끝나므로 복사와 붙여넣기가 필요 없습니다. 버튼이 막히면 페이지 옆의 `결과 복사` 로 예전처럼 붙여넣어도 됩니다.
 
 ## 발행 경로
 
@@ -157,7 +162,7 @@ PIN 은 네 자리라 어깨너머로 보는 사람을 막는 정도이고, 파�
 ## 개발
 
 ```bash
-python3 -m unittest skills/pickme/test_render.py skills/pickme/test_serve.py
+python3 -m unittest skills/pickme/test_render.py skills/pickme/test_serve.py skills/pickme/test_config.py
 bash skills/pickme/test_deliver.sh
 ```
 

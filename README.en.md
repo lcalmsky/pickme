@@ -51,6 +51,7 @@ Other ways to install are in [Installation](#installation).
 | [Publisher hook](#publishing-channels) | A shared host this repository does not know is added to the front of the chain with one executable file |
 | [PIN lock](#the-pin-lock) | Locks the page published to a shared host behind a 4-digit PIN |
 | [Korean and English pages](#language) | `meta.lang` picks the language of the screen text and the copied text |
+| [Setup](#setup) | `/pickme setup` fixes where the requester page opens and where the decider page is published. Name a skill or CLI you publish with and the agent builds and registers a publisher for it |
 
 ### The decision page
 
@@ -122,9 +123,13 @@ A page without the requester round has no requester cell; the approval cells hol
 
 <p align="center"><img src="docs/designer.en.png" alt="A decider page opened without a requester round" width="800"></p>
 
+### Setup
+
+`/pickme setup` fixes two things. Where the requester page opens is `auto` (an Orca tab inside Orca, otherwise the default browser), `orca`, `browser`, or `none`. The publishing route needs nothing to start with: the default is an Orca artifact and then a Claude artifact. When you name a skill or CLI you already publish with, the agent reads its docs and `--help`, builds a publisher file and registers it, then runs it once against a test page. Run `/pickme setup` again to change an answer.
+
 ### The requester round opens locally
 
-The requester is the user on this machine, so that round does not go to a shared host. `serve.py` opens the page on 127.0.0.1 instead, and the page's `Confirm as requester` button sends the reply to that server. The server writes the reply to a file and exits, so nothing is copied or pasted. If the button is blocked, the `Copy result` button beside it still works as before.
+The requester is the user on this machine, so that round does not go to a shared host. `serve.py` opens the page on 127.0.0.1 instead, opening it as an Orca tab or in the default browser as the setting says. The page's `Confirm as requester` button sends the reply to that server, which writes it to a file and exits, so nothing is copied or pasted. If the button is blocked, the `Copy result` button beside it still works as before.
 
 ## Publishing channels
 
@@ -157,7 +162,7 @@ Four digits stop someone reading over a shoulder; they do not stop an offline gu
 ## Development
 
 ```bash
-python3 -m unittest skills/pickme/test_render.py skills/pickme/test_serve.py
+python3 -m unittest skills/pickme/test_render.py skills/pickme/test_serve.py skills/pickme/test_config.py
 bash skills/pickme/test_deliver.sh
 ```
 

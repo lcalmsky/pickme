@@ -14,6 +14,45 @@ directly.
 The page is a single file. Data lives in a JSON file next to it, and a small JS renderer
 builds every card from that data. Only the data changes between rounds — the URL does not.
 
+## Setup
+
+When the user types `/pickme setup` or asks for pickme setup, run this section alone and
+stop. It asks two questions and saves the answers.
+
+**Question 1.** Where the requester page opens. The requester round is local to this
+machine, so the page opens here. Offer `auto` (recommended: an Orca tab inside Orca,
+otherwise the default browser), `orca` (always an Orca tab), `browser` (always the default
+browser), or `none` (print the address only). In Claude Code use AskUserQuestion; in Codex
+ask in plain text and wait for the answer. Save the answer:
+
+```bash
+python3 <skill-dir>/config.py set open <value>
+```
+
+**Question 2.** Where the decider page is published. The default path needs nothing: with
+no publisher of your own, `deliver.sh` falls through to an Orca artifact and then to a Claude
+artifact, both always PIN-locked. When the user names a skill, CLI or command they already
+use for sharing, build a publisher for it:
+
+1. Read that skill's `SKILL.md` or the CLI's `--help` yourself to find the upload command,
+   how to tell whether the session is authenticated, and the shape of the URL it returns.
+   Never guess from the name.
+2. Write an executable file to
+   `${PICKME_PUBLISHERS_DIR:-$HOME/.config/pickme/publishers}/NN-<name>.sh` that follows the
+   publisher contract in **Publishing channels** below: five arguments in, and on success
+   exit code 0 with `delivered: <url>` as the last line of stdout (add ` pin=NNNN` when the
+   page it published is PIN-locked), on failure a non-zero exit with `skip: <reason>` as the
+   last line. A one-time step such as a login or a VPN goes in the reason as
+   `(run: <command>)`, and the login is never automated. Publish the unlocked `--page` only
+   when the user confirms the host is reachable from the internal network alone; otherwise
+   publish `--locked-page` and keep the PIN. Never guess a URL after a failed upload.
+3. `chmod +x` the file, then, with the user's approval, render `example.json` to a test page,
+   run the publisher once, and check that the `delivered:` line comes out. Tell the user how
+   to delete the test post when the host allows it.
+
+Run `/pickme setup` again to change an answer. When the publisher file already exists, show
+it and ask before overwriting it.
+
 ## 1. Collect
 
 First fix who decides. Read the role and the name from the user's request — a PO, a
@@ -88,10 +127,17 @@ answer back, so nothing is copied or pasted. The page it opens carries a **요�
 python3 <skill-dir>/serve.py --dir ~/.pickme/<name>
 ```
 
-In Claude Code start that command with `run_in_background` and give the user the `serving:`
-URL from its first line. Inside Orca (`TERM_PROGRAM=Orca`) open that URL as a browser tab with
-`orca tab create --url <url>`; if the orca CLI is not there, just give the user the URL. In
-Codex run the command in the foreground and wait for it to end.
+`serve.py` opens the page itself, using the setting from `/pickme setup` (or `--open <mode>`
+to override it for one run), and prints `opened: <mode>` or `open-failed: <mode> <reason>`
+after the `serving:` line. Opening happens on a background thread, so that line can also come
+last, after `submitted:` or `timeout`. In Claude Code start the command with
+`run_in_background`, give the user the `serving:` URL, and report an `open-failed:` reason in
+one line so the user can open the URL by hand. In Codex run the command in the foreground and
+wait for it to end. Before the first start, run `python3 <skill-dir>/config.py get open`; when
+it prints `unset` in Claude Code, ask question 1 of the Setup section once and save the
+answer, then start the server. When that command exits with code 2 the config file is broken:
+tell the user in one line, ask them to run `/pickme setup` to save it again, and start the
+server with `--open none` so they can still get the URL.
 
 The page ends the wait by itself. When the process prints `submitted:` and exits 0, the reply
 is in `<dir>/requester-reply.txt`: apply it and publish the decider phase right away.
@@ -199,8 +245,9 @@ user the page and the reply are different versions.
 | `SKILL.md` | This procedure |
 | `template.html` | Page template; data is injected as JSON and rendered by JS |
 | `render.py` | `render` and `apply` subcommands |
-| `serve.py` | Opens the requester page on 127.0.0.1 and writes the reply it submits |
+| `serve.py` | Opens the requester page on 127.0.0.1, opens it in a tab or browser, and writes the reply it submits |
+| `config.py` | `get`, `set` and `path` for the settings `/pickme setup` writes |
 | `lock.mjs` | PBKDF2-SHA256 → AES-GCM-256 encryption of the data blob |
 | `deliver.sh` | Publish chain: user publishers → orca artifact → Claude artifact |
 | `example.json` | Example data (a multi-part decision, a session origin, a custom-input decision) |
-| `test_render.py`, `test_serve.py`, `test_deliver.sh` | Unit tests and stubbed publish-chain tests |
+| `test_render.py`, `test_serve.py`, `test_config.py`, `test_deliver.sh` | Unit tests and stubbed publish-chain tests |
