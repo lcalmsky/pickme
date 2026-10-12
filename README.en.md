@@ -2,7 +2,7 @@
 
 <p align="center"><a href="README.md">한국어</a> · <b>English</b></p>
 
-<p align="center"><b>pick + "pick me"</b>: When your work is blocked on someone else's call, hand them a one-page sheet where all they do is pick — a Claude Code skill</p>
+<p align="center"><b>One page instead of a meeting, one click instead of a reply</b><br><sub>A Claude Code skill for asynchronous decisions</sub></p>
 
 <p align="center">
   <a href="https://github.com/lcalmsky/pickme/releases/latest"><img alt="release" src="https://img.shields.io/github/v/release/lcalmsky/pickme?label=release"></a>
@@ -56,11 +56,9 @@ Other ways to install are in [Installation](#installation).
 
 Items come from three places: open questions in a spec or design doc (`prd`, `doc`), unresolved items on a ticket (`jira`), and blockers hit in this session (`session`). Each item carries its source and background, two to four options, an AI recommendation with a reason, and a custom-input box when the answer might not be on the list.
 
-<p align="center"><img src="docs/designer.en.png" alt="A decider page opened without a requester round" width="800"></p>
+<p align="center"><img src="docs/decider.en.png" alt="A decider page with the requester comparison marks" width="800"></p>
 
 The approval cells at the top right of each card put the requester, the AI and the decider side by side. The decider's cell is marked `✓` when it matches the requester, `✎` when it matches but a memo was left, and `≠` when it differs, so the items that drifted stand out.
-
-<p align="center"><img src="docs/decider.en.png" alt="A decider page with the requester comparison marks" width="800"></p>
 
 <p align="center"><img src="docs/dark.en.png" alt="The decision page in the dark theme" width="800"></p>
 
@@ -119,6 +117,10 @@ Three steps. The agent collects the open decisions and writes the data, the requ
 | 3. Agent | `render.py apply` parses the text the decider sent, fixes what was decided, and continues the work that was blocked |
 
 When there is no requester round, put `skip_requester` in the data and publish the decider page directly. The decider's role is free: a PO, a designer, a developer, a QA — whoever owns the call. The role name goes on the screen as written, so use the wording the team uses.
+
+A page without the requester round has no requester cell; the approval cells hold only the AI recommendation and the decider's pick.
+
+<p align="center"><img src="docs/designer.en.png" alt="A decider page opened without a requester round" width="800"></p>
 
 ### The requester round opens locally
 

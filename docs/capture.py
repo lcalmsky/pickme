@@ -46,7 +46,15 @@ Object.keys(memos).forEach(function (id) {
 });
 // 모두 고르면 뜨는 토스트는 캡처 시점에 따라 찍히기도 해서 그림마다 결과가 달라진다
 document.querySelectorAll(".toast").forEach(function (node) { node.style.display = "none"; });
-console.log("pickme-page-height:" + Math.ceil(document.documentElement.scrollHeight));
+var height = Math.ceil(document.documentElement.scrollHeight);
+var clip = document.querySelector(%s);
+if (clip) {
+  // 하단 액션 바는 화면 아래에 고정되어 있어, 그 높이만큼 더 찍어야 카드가 가려지지 않는다
+  var bar = document.querySelector(".actionbar");
+  var end = clip.getBoundingClientRect().bottom + scrollY + 32 + (bar ? bar.offsetHeight : 0);
+  height = Math.min(height, Math.ceil(end));
+}
+console.log("pickme-page-height:" + height);
 })();</script>"""
 
 # 데모마다 결정권자가 고른 상태. 값은 docs/demos 의 데이터와 맞춰 둔다.
@@ -66,6 +74,9 @@ DEMO_STATE_EN = {
     ),
     'designer': ({'d1': {'c': 'b'}, 'd2': {'c': 'x', 'x': 'Ask for the email again'}}, {}),
 }
+
+# 페이지 전체를 찍으면 README 에서 너무 길어져, 그림마다 이 카드까지만 찍는다
+CLIP = {'requester': '#apq-dec-d1', 'decider': '#apq-dec-d2', 'designer': '#apq-dec-d1', 'dark': '#apq-dec-d1'}
 
 SIZE_MARK = 'pickme-page-height:'
 MEASURE_H = 400
@@ -188,7 +199,8 @@ def main(argv):
         fix = ''
         if theme == 'dark':
             fix += '<script>document.documentElement.setAttribute("data-theme", "dark");</script>'
-        fix += INJECT % (json.dumps(picks, ensure_ascii=False), json.dumps(memos, ensure_ascii=False))
+        fix += INJECT % (json.dumps(picks, ensure_ascii=False), json.dumps(memos, ensure_ascii=False),
+                         json.dumps(CLIP[name]))
         page = page.replace('</body>', fix + '</body>', 1)
         with open(html, 'w', encoding='utf-8') as handle:
             handle.write(page)

@@ -2,7 +2,7 @@
 
 <p align="center"><b>한국어</b> · <a href="README.en.md">English</a></p>
 
-<p align="center"><b>pick + 픽미</b>: 다른 직군의 결정에 막힌 작업을, 고르기만 하면 되는 한 장짜리 페이지로 넘기는 Claude Code 스킬</p>
+<p align="center"><b>회의 대신 한 장, 답장 대신 클릭</b><br><sub>비동기 의사 결정을 위한 Claude Code 스킬</sub></p>
 
 <p align="center">
   <a href="https://github.com/lcalmsky/pickme/releases/latest"><img alt="release" src="https://img.shields.io/github/v/release/lcalmsky/pickme?label=release"></a>
@@ -56,11 +56,9 @@ Claude Code 에서 플러그인을 설치합니다.
 
 결정 항목은 세 곳에서 모읍니다. 기획서나 디자인 명세의 미결 항목(`prd`·`doc`), 티켓의 미해결 항목(`jira`), 그리고 이번 세션에서 막힌 자리(`session`)입니다. 항목마다 출처와 배경, 선택지 2~4개, AI 권장과 이유가 붙고, 목록에 없는 답이 나올 수 있으면 직접 입력 칸을 둡니다.
 
-<p align="center"><img src="docs/designer.png" alt="요청자 단계를 건너뛰고 바로 열린 결정권자 페이지" width="800"></p>
+<p align="center"><img src="docs/decider.png" alt="요청자 선택과 비교 표시가 붙은 결정권자 단계 페이지" width="800"></p>
 
 오른쪽 위 결재 칸에는 요청자·AI·결정권자의 선택이 나란히 놓입니다. 결정권자 칸에는 요청자와 같으면 `✓`, 같지만 메모가 있으면 `✎`, 다르면 `≠` 가 붙어 어긋난 항목이 바로 드러납니다.
-
-<p align="center"><img src="docs/decider.png" alt="요청자 선택과 비교 표시가 붙은 결정권자 단계 페이지" width="800"></p>
 
 <p align="center"><img src="docs/dark.png" alt="다크 테마 결정 페이지" width="800"></p>
 
@@ -119,6 +117,10 @@ cp -r pickme/skills/pickme ~/.claude/skills/
 | 3. 에이전트 | 결정권자가 보낸 텍스트를 `render.py apply` 가 파싱해 무엇이 정해졌는지 확정하고, 막혀 있던 작업을 이어 갑니다 |
 
 요청자 단계가 필요 없으면 데이터에 `skip_requester` 를 두고 결정권자 페이지로 바로 발행합니다. 결정권자의 역할은 자유롭게 정합니다 — PO, 디자이너, 개발자, QA 처럼 그 결정을 쥔 사람이면 됩니다. 역할 이름은 화면에 그대로 나오므로 팀에서 쓰는 낱말을 씁니다.
+
+요청자 단계를 건너뛴 페이지에는 요청자 칸이 없고, 결재 칸에 AI 권장과 결정권자의 선택만 놓입니다.
+
+<p align="center"><img src="docs/designer.png" alt="요청자 단계를 건너뛰고 바로 열린 결정권자 페이지" width="800"></p>
 
 ### 요청자 단계는 로컬로 엽니다
 
