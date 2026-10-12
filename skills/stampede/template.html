@@ -158,6 +158,7 @@
   .cbtext { margin: 8px 0 0; font-family: var(--font-mono); font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
 
   .part + .part { margin-top: 20px; }
+  .part.unsel { outline: 2px solid var(--req); outline-offset: 3px; border-radius: 12px; }
   .part-label { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
   .opts { display: grid; gap: 10px; }
   .opt { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: start;
@@ -224,6 +225,8 @@
   .ab-right { margin-left: auto; display: flex; align-items: center; gap: 10px; min-width: 0; }
   .ab-warn { font-size: 13px; color: var(--req); white-space: nowrap; }
   .ab-count.ready { color: var(--ai); font-weight: 600; white-space: normal; }
+  .ab-count.guard { color: var(--req); font-weight: 700; white-space: normal; }
+  .actionbar.shake { animation: pinshake 300ms ease; }
   .actionbar.pulse .btn { animation: abpulse 420ms ease-out; }
   @keyframes abpulse {
     0%, 100% { transform: scale(1); }
@@ -315,6 +318,10 @@
       "toastCopyManual": "직접 복사해 주세요",
       "submittedMsg": "전달했어요. 에이전트가 이어서 진행합니다. 이 창은 닫아도 됩니다",
       "unselectedShort": "미선택 {n}개",
+      "unselectedGuard": "{n}개를 아직 고르지 않았어요",
+      "showUnpicked": "미선택 항목 보기",
+      "sendAnyway": "그대로 보내기",
+      "copyAnyway": "그대로 복사",
       "toastSubmitFailed": "전달하지 못했어요. 결과 복사로 전달해 주세요",
       "copy": "복사",
       "copied": "복사됨",
@@ -396,6 +403,10 @@
       "toastCopyManual": "Please copy it by hand",
       "submittedMsg": "Sent. The agent continues from here; you can close this window",
       "unselectedShort": "{n} not selected",
+      "unselectedGuard": "{n} not picked yet",
+      "showUnpicked": "Show unpicked",
+      "sendAnyway": "Send anyway",
+      "copyAnyway": "Copy anyway",
       "toastSubmitFailed": "Could not send. Pass it on with Copy result",
       "copy": "Copy",
       "copied": "Copied",
@@ -819,7 +830,9 @@
       }
     }
 
-    function copyText() {
+    function copyText(force) {
+      // 확인 단계의 "그대로 복사" 가 force 로 부른다. 그 밖에는 미선택이 남았으면 여기서 멈춘다
+      if (unselectedCount() > 0 && !force) { openGuard("copy"); return; }
       function done() {
         toast(phase === "requester" ? t("toastCopiedRequester") : t("toastCopiedDecider"));
         if (abRevert) clearTimeout(abRevert);
@@ -847,11 +860,9 @@
       abBtn.disabled = true;
     }
 
-    function submitReply() {
-      var unselected = 0;
-      parts.forEach(function (x) { if (!state.picks[x.part.id]) unselected++; });
-      // 미선택은 confirm 으로 막지 않는다. 바 안 경고만 남기고 그대로 보낼 수 있게 둔다
-      abWarn.textContent = unselected > 0 ? tf("unselectedShort", { n: unselected }) : "";
+    function submitReply(force) {
+      // 확인 단계의 "그대로 보내기" 가 force 로 부른다. 그 밖에는 미선택이 남았으면 여기서 멈춘다
+      if (unselectedCount() > 0 && !force) { openGuard("submit"); return; }
       abSubmit.disabled = true;
       fetch(submitUrl, {
         method: "POST",
@@ -1017,6 +1028,8 @@
       parts.forEach(function (x) { if (state.picks[x.part.id]) done++; });
       var total = parts.length;
       var unselected = total - done;
+      // 확인 상태에서 선택이 늘거나 줄면 문구가 가리키는 수가 달라지므로 평소 상태로 돌린다
+      if (guardAction && unselected !== guardCount) closeGuard();
       var pct = total ? (done / total * 100) + "%" : "0%";
       railCount.textContent = tf("progressOf", { total: total, done: done });
       mCount.textContent = done + "/" + total;
@@ -1037,6 +1050,7 @@
       }
       completeSeen = complete;
       summaryEl.textContent = buildText();
+      markUnselectedParts();
       decisions.forEach(function (dec) { renderApproval(dec); renderDot(dec); });
       animateId = null;
       if (submitted) markSubmitted();
@@ -1332,13 +1346,76 @@
 
     /* --- 하단 액션 바 --- */
     var abBtn = el("button", { type: "button", class: "btn", text: t("copyResult") });
-    abBtn.addEventListener("click", copyText);
+    abBtn.addEventListener("click", function () { copyText(); });
     // 전송이 막히면 이 보조 버튼이 남은 길이라 항상 옆에 둔다
     var abSubmit = submitMode ? el("button", { type: "button", class: "btn primary", text: t("submitButton") }) : null;
-    if (abSubmit) abSubmit.addEventListener("click", submitReply);
+    if (abSubmit) abSubmit.addEventListener("click", function () { submitReply(); });
+    var abGuardText = el("span", { class: "ab-count guard", hidden: true });
+    var abGuardView = el("button", { type: "button", class: "btn ghost small", text: t("showUnpicked"), hidden: true });
+    var abGuardGo = el("button", { type: "button", class: "btn primary", text: t("sendAnyway"), hidden: true });
     var actionbar = el("div", { class: "actionbar" }, [
-      el("div", { class: "ab-in" }, [abCount, el("div", { class: "ab-right" }, [abWarn, abBtn, abSubmit])]),
+      el("div", { class: "ab-in" }, [abCount, abGuardText, el("div", { class: "ab-right" }, [abWarn, abBtn, abSubmit, abGuardView, abGuardGo])]),
     ]);
+
+    /* --- 미선택 확인 단계 --- */
+    var guardAction = null;
+    var guardCount = 0;
+    var guardHighlight = false;
+
+    function unselectedCount() {
+      var n = 0;
+      parts.forEach(function (x) { if (!state.picks[x.part.id]) n++; });
+      return n;
+    }
+
+    function closeGuard() {
+      guardAction = null;
+      abGuardText.hidden = true;
+      abGuardView.hidden = true;
+      abGuardGo.hidden = true;
+      abCount.hidden = false;
+      abWarn.hidden = false;
+      abBtn.hidden = false;
+      if (abSubmit) abSubmit.hidden = false;
+    }
+
+    function openGuard(action) {
+      guardAction = action;
+      guardCount = unselectedCount();
+      abGuardText.textContent = tf("unselectedGuard", { n: guardCount });
+      abGuardText.hidden = false;
+      abCount.hidden = true;
+      abWarn.hidden = true;
+      abBtn.hidden = true;
+      if (abSubmit) abSubmit.hidden = true;
+      abGuardGo.textContent = t(action === "submit" ? "sendAnyway" : "copyAnyway");
+      abGuardView.hidden = false;
+      abGuardGo.hidden = false;
+      actionbar.classList.remove("shake");
+      void actionbar.offsetWidth;
+      actionbar.classList.add("shake");
+      setTimeout(function () { actionbar.classList.remove("shake"); }, 400);
+    }
+
+    // 강조는 "미선택 항목 보기" 를 누른 뒤부터 붙고, 그 항목을 고르면 그 자리에서 사라진다
+    function markUnselectedParts() {
+      parts.forEach(function (x) {
+        ui[x.part.id].anchor.classList.toggle("unsel", guardHighlight && !state.picks[x.part.id]);
+      });
+    }
+
+    abGuardView.addEventListener("click", function () {
+      closeGuard();
+      guardHighlight = true;
+      markUnselectedParts();
+      cursor = -1;
+      gotoUnselected();
+    });
+    abGuardGo.addEventListener("click", function () {
+      var action = guardAction;
+      closeGuard();
+      if (action === "submit") submitReply(true); else copyText(true);
+    });
 
     /* --- 미선택 항목으로 --- */
     var cursor = -1;

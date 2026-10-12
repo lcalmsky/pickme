@@ -456,6 +456,46 @@ class RenderTests(unittest.TestCase):
         self.assertIn('abRevert = setTimeout(function () { abBtn.textContent = t("copyResult"); }, 2000);', text)
         self.assertIn('toast(t("toastCopyManual"));', text)
 
+    def test_unselected_picks_ask_once_more_in_the_action_bar(self):
+        out = self.tmp / "guard.html"
+        proc = run_render("render", str(EXAMPLE), "--out", str(out),
+                          "--submit-url", "http://127.0.0.1:8123/tok/submit")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        _, text = payload_of(out)
+
+        # 미선택이 남은 채로 누르면 전송·복사하지 않고 확인 단계부터 연다
+        self.assertIn('if (unselectedCount() > 0 && !force) { openGuard("submit"); return; }', text)
+        self.assertIn('if (unselectedCount() > 0 && !force) { openGuard("copy"); return; }', text)
+        # 버튼 핸들러를 그대로 물리면 클릭 이벤트가 force 로 들어가 확인 단계를 건너뛴다
+        self.assertIn('abBtn.addEventListener("click", function () { copyText(); });', text)
+        self.assertIn('if (abSubmit) abSubmit.addEventListener("click", function () { submitReply(); });', text)
+        self.assertIn('if (action === "submit") submitReply(true); else copyText(true);', text)
+
+        # 확인 상태의 문구와 버튼 둘
+        self.assertIn('abGuardText.textContent = tf("unselectedGuard", { n: guardCount });', text)
+        self.assertEqual(len(re.findall(r'text:\s*t\("showUnpicked"\)', text)), 1)
+        self.assertIn('abGuardGo.textContent = t(action === "submit" ? "sendAnyway" : "copyAnyway");', text)
+        self.assertIn('abGuardView.hidden = false;', text)
+        self.assertIn('abGuardGo.hidden = false;', text)
+        guard_css = re.search(r'\.ab-count\.guard\s*\{([^}]*)\}', text)
+        self.assertIsNotNone(guard_css, ".ab-count.guard rule not found")
+        self.assertIn("var(--req)", guard_css.group(1))
+        self.assertIn("font-weight: 700", guard_css.group(1))
+        # 바를 흔드는 것은 기존 pin shake 키프레임을 그대로 쓴다
+        self.assertRegex(text, r'\.actionbar\.shake\s*\{[^}]*animation:\s*pinshake')
+
+        # "미선택 항목 보기" 는 기존 이동 동작을 그대로 태우고, 미선택 항목에만 강조를 켠다
+        self.assertIn('guardHighlight = true;\n      markUnselectedParts();\n      cursor = -1;\n      gotoUnselected();', text)
+        self.assertIn('var guardHighlight = false;', text)
+        self.assertIn('ui[x.part.id].anchor.classList.toggle("unsel", guardHighlight && !state.picks[x.part.id]);', text)
+        self.assertIn("markUnselectedParts();", text)
+        unsel_css = re.search(r'\.part\.unsel\s*\{([^}]*)\}', text)
+        self.assertIsNotNone(unsel_css, ".part.unsel rule not found")
+        self.assertIn("2px solid var(--req)", unsel_css.group(1))
+
+        # 확인 상태에서 선택이 바뀌면 평소 상태로 돌아가 다시 센다
+        self.assertIn('if (guardAction && unselected !== guardCount) closeGuard();', text)
+
     def test_submit_url_reaches_the_payload_and_the_bar(self):
         out = self.tmp / "local.html"
         proc = run_render("render", str(EXAMPLE), "--out", str(out),
