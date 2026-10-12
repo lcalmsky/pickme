@@ -1,14 +1,14 @@
 ---
-name: stampede
-description: "Ask someone else — a PO, designer, developer, QA, or anyone who owns the call — to decide open decisions through a shared HTML page: the requester optionally picks first, the AI recommendation is marked, the decider makes the final pick, and a copy button returns the result. Use when the user types /stampede or $stampede, or asks to get decisions from a PO, designer, or another developer."
+name: pickme
+description: "Ask someone else — a PO, designer, developer, QA, or anyone who owns the call — to decide open decisions through a shared HTML page: the requester optionally picks first, the AI recommendation is marked, the decider makes the final pick, and a copy button returns the result. Use when the user types /pickme or $pickme, or asks to get decisions from a PO, designer, or another developer."
 argument-hint: "[topic or ticket key]"
 ---
 
-# Stampede
+# Pickme
 
 Collect the decisions you cannot make alone, publish them as one HTML page, and run the
 rounds through it. The requester (the user) picks first when that round is wanted, then the
-decider stamps over it. Skip the requester round and the page opens on the decider phase
+decider makes the final pick over it. Skip the requester round and the page opens on the decider phase
 directly.
 
 The page is a single file. Data lives in a JSON file next to it, and a small JS renderer
@@ -47,7 +47,7 @@ Leave out anything already decided. A page with three real decisions beats one w
 
 ## 2. Write data
 
-Write `~/.stampede/<name>/decisions.json`, with `<name>` lowercase letters, digits and
+Write `~/.pickme/<name>/decisions.json`, with `<name>` lowercase letters, digits and
 hyphens. That directory is the state directory; everything else is written beside it.
 
 The schema is in `example.json`. The only field that changes between rounds is
@@ -85,7 +85,7 @@ answer back, so nothing is copied or pasted. The page it opens carries a **요�
 (`Confirm as requester`) button, and pressing it hands the reply straight to the agent:
 
 ```bash
-python3 <skill-dir>/serve.py --dir ~/.stampede/<name>
+python3 <skill-dir>/serve.py --dir ~/.pickme/<name>
 ```
 
 In Claude Code start that command with `run_in_background` and give the user the `serving:`
@@ -97,7 +97,7 @@ The page ends the wait by itself. When the process prints `submitted:` and exits
 is in `<dir>/requester-reply.txt`: apply it and publish the decider phase right away.
 
 ```bash
-<skill-dir>/render.py apply ~/.stampede/<name>/decisions.json ~/.stampede/<name>/requester-reply.txt
+<skill-dir>/render.py apply ~/.pickme/<name>/decisions.json ~/.pickme/<name>/requester-reply.txt
 ```
 
 If it ends with `timeout` and exit 3 instead, nobody submitted — ask the user whether to open
@@ -109,7 +109,7 @@ and the publish below goes straight to the decider phase. That page is shared, s
 published as it always was.
 
 ```bash
-<skill-dir>/deliver.sh --name <name> --dir ~/.stampede/<name>
+<skill-dir>/deliver.sh --name <name> --dir ~/.pickme/<name>
 ```
 
 ### Publishing channels
@@ -117,7 +117,7 @@ published as it always was.
 `deliver.sh` tries the user's own publishers first, then Orca, then a Claude artifact. Report
 any `skip: <channel> <reason>` line in one line, so a silent downgrade is visible.
 
-**Publishers.** Executable files in `${STAMPEDE_PUBLISHERS_DIR:-$HOME/.config/stampede/publishers}`
+**Publishers.** Executable files in `${PICKME_PUBLISHERS_DIR:-$HOME/.config/pickme/publishers}`
 are tried in filename order (`10-intranet.sh`, `20-team-wiki.sh`). A missing or empty
 directory skips the whole step silently. Each publisher is called as:
 
@@ -158,7 +158,7 @@ fallback for when the page could not reach the server and the user pasted the co
 into the chat. Save it to a scratch file and run:
 
 ```bash
-<skill-dir>/render.py apply ~/.stampede/<name>/decisions.json <file>
+<skill-dir>/render.py apply ~/.pickme/<name>/decisions.json <file>
 ```
 
 Then publish again with the same `--name` and `--dir` and no `--start`. `deliver.sh` reads

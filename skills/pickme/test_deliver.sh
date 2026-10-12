@@ -11,12 +11,12 @@ trap 'rm -rf "$tmp"' EXIT
 
 export CALL_LOG="$tmp/calls.log"
 export ORCA_BIN="$tmp/orca.sh"
-export STAMPEDE_PUBLISHERS_DIR="$tmp/publishers"
+export PICKME_PUBLISHERS_DIR="$tmp/publishers"
 export PYTHON="${PYTHON:-python3}"
 
-mkdir -p "$STAMPEDE_PUBLISHERS_DIR"
+mkdir -p "$PICKME_PUBLISHERS_DIR"
 
-cat > "$STAMPEDE_PUBLISHERS_DIR/10-first.sh" <<'SH'
+cat > "$PICKME_PUBLISHERS_DIR/10-first.sh" <<'SH'
 #!/usr/bin/env bash
 printf 'pub first %s\n' "$*" >> "$CALL_LOG"
 [[ -n "${FIRST_OUT:-}" ]] && printf '%s\n' "$FIRST_OUT"
@@ -24,7 +24,7 @@ printf 'pub first %s\n' "$*" >> "$CALL_LOG"
 exit "${FIRST_RC:-0}"
 SH
 
-cat > "$STAMPEDE_PUBLISHERS_DIR/20-second.sh" <<'SH'
+cat > "$PICKME_PUBLISHERS_DIR/20-second.sh" <<'SH'
 #!/usr/bin/env bash
 printf 'pub second %s\n' "$*" >> "$CALL_LOG"
 [[ -n "${SECOND_OUT:-}" ]] && printf '%s\n' "$SECOND_OUT"
@@ -44,7 +44,7 @@ esac
 exit 0
 SH
 
-chmod +x "$STAMPEDE_PUBLISHERS_DIR"/*.sh "$ORCA_BIN"
+chmod +x "$PICKME_PUBLISHERS_DIR"/*.sh "$ORCA_BIN"
 
 NAME=demo-signup-revamp
 OUT="$tmp/out"; ERR="$tmp/err"; RC=0
@@ -53,7 +53,7 @@ pass=0; fail=0; CASE_STATUS=0; CASE_DESC=""
 reset_stub_env() {
   unset FIRST_OUT FIRST_ERR FIRST_RC SECOND_OUT SECOND_RC \
         ORCA_SHARE_OUT ORCA_SHARE_ERR ORCA_SHARE_RC
-  export STAMPEDE_PUBLISHERS_DIR="$tmp/publishers"
+  export PICKME_PUBLISHERS_DIR="$tmp/publishers"
   export ORCA_BIN="$tmp/orca.sh"
   export FIRST_OUT='delivered: https://pub.example/first?v=1'
   export FIRST_RC=0
@@ -169,7 +169,7 @@ end_case
 
 start_case "3: no publisher directory skips the stage without a skip line"
 rm -rf "$STATE_DIR"; mkdir -p "$STATE_DIR"; cp "$EXAMPLE" "$STATE_DIR/decisions.json"
-export STAMPEDE_PUBLISHERS_DIR="$tmp/no-such-publishers"
+export PICKME_PUBLISHERS_DIR="$tmp/no-such-publishers"
 run
 expect_exit 0
 expect_stdout_prefix "delivered: orca-artifact $orca_url pin="
@@ -178,8 +178,8 @@ expect_call '^orca artifacts share '
 end_case
 
 start_case "4: an empty publisher directory is skipped the same way"
-export STAMPEDE_PUBLISHERS_DIR="$tmp/empty-publishers"
-mkdir -p "$STAMPEDE_PUBLISHERS_DIR"
+export PICKME_PUBLISHERS_DIR="$tmp/empty-publishers"
+mkdir -p "$PICKME_PUBLISHERS_DIR"
 run
 expect_exit 0
 expect_stdout_prefix "delivered: orca-artifact $orca_url pin="

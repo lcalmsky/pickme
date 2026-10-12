@@ -1,13 +1,13 @@
 {
-  "name": "stampede",
+  "name": "pickme",
   "version": "0.1.0",
-  "description": "Ask someone else to decide open decisions through a shared HTML page: the requester picks first, the AI recommendation is marked, the decider stamps the final pick, and a copy button returns the result.",
+  "description": "Ask someone else to decide open decisions through a shared HTML page: the requester picks first, the AI recommendation is marked, the decider makes the final pick, and a copy button returns the result.",
   "author": {
     "name": "lcalmsky",
     "url": "https://github.com/lcalmsky"
   },
-  "homepage": "https://github.com/lcalmsky/stampede",
-  "repository": "https://github.com/lcalmsky/stampede",
+  "homepage": "https://github.com/lcalmsky/pickme",
+  "repository": "https://github.com/lcalmsky/pickme",
   "license": "MIT",
   "keywords": ["decision", "approval", "handoff", "html", "claude-code"]
 }

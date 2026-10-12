@@ -5,7 +5,7 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 RENDER="$HERE/render.py"
 ORCA_BIN="${ORCA_BIN:-orca}"
 PYTHON="${PYTHON:-python3}"
-PUBLISHERS_DIR="${STAMPEDE_PUBLISHERS_DIR:-$HOME/.config/stampede/publishers}"
+PUBLISHERS_DIR="${PICKME_PUBLISHERS_DIR:-$HOME/.config/pickme/publishers}"
 
 usage() {
   printf 'usage: %s --name <name> --dir <state-dir> [--start publisher:<file>|orca|claude]\n' "${0##*/}" >&2

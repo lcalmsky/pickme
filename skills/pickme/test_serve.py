@@ -10,7 +10,7 @@ import urllib.request
 from pathlib import Path
 
 HERE = Path(__file__).resolve().parent
-# 저장소 뿌리에서 `python3 -m unittest skills/stampede/test_serve.py` 로도 돌게 한다
+# 저장소 뿌리에서 `python3 -m unittest skills/pickme/test_serve.py` 로도 돌게 한다
 sys.path.insert(0, str(HERE))
 
 from test_render import REQUESTER_REPLY

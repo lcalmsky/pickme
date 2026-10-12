@@ -12,7 +12,7 @@ import time
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 REPO = os.path.dirname(HERE)
-RENDER = os.path.join(REPO, 'skills', 'stampede', 'render.py')
+RENDER = os.path.join(REPO, 'skills', 'pickme', 'render.py')
 
 CHROME = os.environ.get('CHROME') or '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome'
 WIDTH = 1200
@@ -44,7 +44,7 @@ Object.keys(memos).forEach(function (id) {
   area.value = memos[id];
   fire(area, "input");
 });
-console.log("stampede-page-height:" + Math.ceil(document.documentElement.scrollHeight));
+console.log("pickme-page-height:" + Math.ceil(document.documentElement.scrollHeight));
 })();</script>"""
 
 # 데모마다 결정권자가 고른 상태. 값은 docs/demos 의 데이터와 맞춰 둔다.
@@ -65,7 +65,7 @@ DEMO_STATE_EN = {
     'designer': ({'d1': {'c': 'b'}, 'd2': {'c': 'x', 'x': 'Ask for the email again'}}, {}),
 }
 
-SIZE_MARK = 'stampede-page-height:'
+SIZE_MARK = 'pickme-page-height:'
 MEASURE_H = 400
 
 
@@ -168,8 +168,8 @@ def main(argv):
     name = demo if theme == 'light' else 'dark'
     out_png = os.path.join(HERE, '%s.en.png' % name if lang == 'en' else '%s.png' % name)
 
-    work_dir = tempfile.mkdtemp(prefix='stampede-capture-')
-    ud_root = tempfile.mkdtemp(prefix='stampede-chrome-')
+    work_dir = tempfile.mkdtemp(prefix='pickme-capture-')
+    ud_root = tempfile.mkdtemp(prefix='pickme-chrome-')
     try:
         html = os.path.join(work_dir, '%s.%s.%s.html' % (demo, lang, theme))
         result = subprocess.run([sys.executable, RENDER, 'render', src, '--out', html],
