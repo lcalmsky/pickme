@@ -623,6 +623,16 @@ class ApplyTests(unittest.TestCase):
         self.assertIn("요청자와 다른 선택: 1개", proc.stdout)
         self.assertFalse((self.tmp / "po-result.json").exists())
 
+    def test_apply_decider_skips_parts_the_requester_left_unpicked(self):
+        # 요청자가 비워 둔 part 는 견줄 짝이 없으므로 결정권자가 골라도 불일치로 세지 않는다
+        self.assertEqual(self.apply(REQUESTER_REPLY.replace("d2=a;", "")).returncode, 0)
+        proc = self.apply(DECIDER_REPLY)
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        result = json.loads((self.tmp / "decision-result.json").read_text(encoding="utf-8"))
+        self.assertEqual(result["picks"]["d2"], {"c": "a"})
+        self.assertEqual(result["diff_from_requester"], ["d1"])
+        self.assertIn("요청자와 다른 선택: 1개", proc.stdout)
+
     def test_apply_legacy_po_reply_is_accepted(self):
         self.assertEqual(self.apply(REQUESTER_REPLY).returncode, 0)
         proc = self.apply(PO_REPLY)

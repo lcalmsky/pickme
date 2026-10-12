@@ -269,7 +269,7 @@ def cmd_apply(args):
     result = {"picks": picks, "memos": memos, "note": note}
     diff = []
     if requester:
-        diff = [part_id for part_id, pick in picks.items() if not same_pick(requester.get(part_id), pick)]
+        diff = [part_id for part_id, pick in picks.items() if part_id in requester and not same_pick(requester[part_id], pick)]
         result["diff_from_requester"] = diff
     out = Path(args.data).resolve().with_name("decision-result.json")
     write_json(out, result)
