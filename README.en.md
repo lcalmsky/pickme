@@ -102,10 +102,10 @@ cp -r pickme/skills/pickme ~/.claude/skills/
 
 ### Install from Orca
 
-With [Orca](https://onorca.dev), open the [share link](https://share.onorca.dev/skills/share/shr_f5bcbee85cb821893b113bbb8e4795003903aa02b112d287) and press `Open in Orca`. Orca shows the files it contains and lets you pick where to install them.
+With [Orca](https://onorca.dev), open the [share link](https://share.onorca.dev/skills/share/shr_e5bf1a460177216cea40f064de523ff6504cc4b8b6422fbc) and press `Open in Orca`. Orca shows the files it contains and lets you pick where to install them.
 
 > [!NOTE]
-> An Orca share link keeps the files it was published with, so it cannot be changed. The current link carries v0.1.2 and later releases are not in it. Install the latest with the plugin or skill folder way.
+> An Orca share link keeps the files it was published with, so it cannot be changed. The current link carries v0.2.0 and later releases are not in it. Install the latest with the plugin or skill folder way.
 
 ## Usage
 
