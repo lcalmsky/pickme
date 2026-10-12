@@ -1,0 +1,15 @@
+{
+  "name": "stampede",
+  "description": "stampede: a Claude Code skill that collects open decisions on one HTML page and returns the answer.",
+  "owner": {
+    "name": "lcalmsky",
+    "url": "https://github.com/lcalmsky"
+  },
+  "plugins": [
+    {
+      "name": "stampede",
+      "source": "./",
+      "description": "Ask someone else to decide open decisions through a shared HTML page: the requester picks first, the AI recommendation is marked, the decider stamps the final pick, and a copy button returns the result."
+    }
+  ]
+}

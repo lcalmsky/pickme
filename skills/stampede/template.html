@@ -1,0 +1,1405 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>__APQ_TITLE__</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&amp;family=IBM+Plex+Mono:wght@500&amp;display=swap">
+<style>
+  :root {
+    /* 결재 서류 레이아웃: 데스크톱은 왼쪽 고정 목차 레일 + 오른쪽 문서, 하단 고정 액션 바 */
+    color-scheme: light;
+    --bg: #F5F6F9;
+    --surface: #FFFFFF;
+    --ink: #1A1D27;
+    --muted: #626A7B;
+    --line: #E2E5EC;
+    --accent: #3346C4;
+    --accent-soft: #ECEFFD;
+    --on-accent: #FFFFFF;
+    --req: #A35F00;
+    --req-soft: #FDF3E3;
+    --ai: #0B7F74;
+    --ai-soft: #E3F5F2;
+    --stamp: #C8382A;
+    --font-body: "IBM Plex Sans KR", -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Noto Sans KR", "Malgun Gothic", sans-serif;
+    --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+    --rail: 260px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #121318; --surface: #1B1D24; --ink: #EEF0F5; --muted: #9AA1B2; --line: #2C303A;
+      --accent: #8B9BFF; --accent-soft: #23284A; --on-accent: #12131A;
+      --req: #F0B45C; --req-soft: #33270F; --ai: #4FD1C2; --ai-soft: #0F2E2B; --stamp: #FF7A6B;
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #121318; --surface: #1B1D24; --ink: #EEF0F5; --muted: #9AA1B2; --line: #2C303A;
+    --accent: #8B9BFF; --accent-soft: #23284A; --on-accent: #12131A;
+    --req: #F0B45C; --req-soft: #33270F; --ai: #4FD1C2; --ai-soft: #0F2E2B; --stamp: #FF7A6B;
+    color-scheme: dark;
+  }
+  * { box-sizing: border-box; }
+  [hidden] { display: none !important; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: var(--font-body); font-size: 16px; line-height: 1.7; letter-spacing: -0.01em;
+    word-break: keep-all; overflow-wrap: anywhere;
+  }
+  h1, h2, h3 { text-wrap: balance; line-height: 1.35; margin: 0; overflow-wrap: anywhere; }
+  p { margin: 0; }
+  a { color: var(--accent); text-decoration: none; overflow-wrap: anywhere; }
+  a:hover, a:focus-visible { text-decoration: underline; }
+  :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+  /* 머리 */
+  .doc-head { padding-top: 4px; }
+  h1.title { font-size: 28px; font-weight: 700; letter-spacing: -0.02em; }
+  .meta { color: var(--muted); font-size: 14px; margin-top: 8px; font-variant-numeric: tabular-nums; }
+  .lead { font-size: 16px; margin-top: 12px; }
+  .src { font-size: 13px; color: var(--muted); margin-top: 8px; }
+  .steps { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; margin-top: 18px; }
+  .step { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--muted); }
+  .step .snum { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--line); display: grid; place-items: center; font-family: var(--font-mono); font-size: 11px; }
+  .step.now { color: var(--accent); font-weight: 600; }
+  .step.now .snum { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+  .steps .sep { color: var(--muted); font-size: 12px; }
+  .legend { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
+  .marklegend { margin-top: 6px; font-size: 12px; color: var(--muted); }
+  .marklegend .mk { font-weight: 600; }
+  .marklegend .mk.same { color: var(--ai); }
+  .marklegend .mk.memo { color: var(--req); }
+  .marklegend .mk.diff { color: var(--stamp); }
+  .chip { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; font-weight: 600; border-radius: 999px; padding: 3px 10px; border: 1px solid transparent; white-space: nowrap; }
+  .chip.req { color: var(--req); background: var(--req-soft); }
+  .chip.ai { color: var(--ai); background: var(--ai-soft); }
+  .chip.po { color: var(--stamp); border-color: var(--stamp); }
+  .chip.prd { color: var(--accent); background: var(--accent-soft); }
+  .chip.jira { color: var(--ai); background: var(--ai-soft); }
+  .chip.session { color: var(--req); background: var(--req-soft); }
+  .po-sum { margin-top: 16px; background: var(--req-soft); border-radius: 12px; padding: 12px 14px; font-size: 14px; }
+  .po-sum .links { display: flex; flex-wrap: wrap; gap: 4px 12px; margin-top: 6px; font-size: 13px; }
+
+  /* 레일 */
+  .rail { display: none; }
+  .rbox { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 14px; }
+  .rail .count { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; margin-bottom: 8px; }
+  .pbar { height: 4px; border-radius: 999px; background: var(--line); overflow: hidden; }
+  .pbar > i { display: block; height: 100%; width: 0; background: var(--accent); border-radius: 999px; transition: width 0.2s ease; }
+  .rail .pbar { margin-bottom: 14px; }
+  .toc { list-style: none; margin: 0 0 12px; padding: 0; display: grid; gap: 2px; }
+  .toc button { display: flex; gap: 9px; align-items: flex-start; width: 100%; text-align: left; background: none; border: 0; font: inherit; font-size: 14px; color: var(--ink); padding: 7px 8px; border-radius: 8px; cursor: pointer; }
+  .toc button:hover { background: var(--accent-soft); }
+  .toc .tnum { font-family: var(--font-mono); font-size: 12px; color: var(--muted); padding-top: 2px; white-space: nowrap; }
+  .toc .ttitle { min-width: 0; flex: 1 1 auto; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; border: 1.5px solid var(--muted); flex: 0 0 auto; margin-top: 7px; }
+  .dot.done { border-color: var(--accent); background: var(--accent); }
+  .dot.stamp { border-color: var(--stamp); background: var(--stamp); }
+  .rail .rbtns { display: grid; gap: 8px; }
+  .filter { display: flex; gap: 7px; align-items: center; font-size: 13px; color: var(--muted); cursor: pointer; }
+  .filter input { width: 15px; height: 15px; accent-color: var(--accent); }
+
+  /* 본문 */
+  .doc { min-width: 0; padding-bottom: calc(104px + env(safe-area-inset-bottom, 0px)); }
+  main { margin-top: 28px; }
+
+  .card { background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: clamp(16px, 3vw, 22px); scroll-margin-top: 92px; }
+  .card + .card { margin-top: 20px; }
+  .chead { display: flex; gap: 16px; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; }
+  .chead .htext { min-width: 0; flex: 1 1 240px; }
+  .cnum { font-family: var(--font-mono); font-size: 12px; color: var(--muted); }
+  .ctitle { font-size: 20px; font-weight: 600; margin-top: 6px; }
+  .cquestion { color: var(--muted); font-size: 14px; margin-top: 4px; }
+  .cside { flex: 0 0 auto; text-align: right; }
+
+  .approval { display: inline-block; }
+  .arow { display: flex; align-items: center; gap: 6px; }
+  .arow + .arow { margin-top: 6px; }
+  .arow.head .acol { font-size: 11px; font-weight: 600; color: var(--muted); white-space: nowrap; }
+  .alabel { font-size: 11px; color: var(--muted); text-align: right; padding-right: 4px; flex: 1 1 auto; min-width: 0; }
+  /* 열 이름은 언어마다 길이가 달라(Requester) 줄바꿈되지 않게 폭을 잡는다 */
+  .acol { width: 60px; flex: 0 0 auto; display: grid; place-items: center; }
+  .acol.marked { position: relative; }
+  /* 칸(.cell)은 overflow: hidden 이라 모서리 기호가 잘리므로 바깥 래퍼에 붙인다 */
+  .cmark { position: absolute; top: -5px; right: -5px; width: 16px; height: 16px; border-radius: 50%; background: var(--surface); border: 1.5px solid currentColor; display: grid; place-items: center; font-size: 10px; font-weight: 700; line-height: 1; }
+  .cmark.same { color: var(--ai); }
+  .cmark.memo { color: var(--req); }
+  .cmark.diff { color: var(--stamp); }
+  .cell { width: 46px; height: 38px; border-radius: 9px; border: 1px solid var(--line); background: var(--bg); display: grid; place-items: center; font-family: var(--font-mono); font-size: 14px; color: var(--ink); overflow: hidden; }
+  .cell .ctext { display: block; max-width: 100%; padding: 0 4px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .cell.empty { border-style: dashed; }
+  .cell.stamp { width: 42px; height: 42px; border: 2px solid var(--stamp); border-radius: 50%; color: var(--stamp); font-size: 12px; transform: rotate(-8deg); }
+  .cell.stamp.same { border-color: var(--ai); color: var(--ai); }
+  .cell.stamp.memo { border-color: var(--req); color: var(--req); }
+  .cell.stamp.diff { border-color: var(--stamp); color: var(--stamp); }
+  .cell.stamp.pop { animation: stamppop 180ms ease-out; }
+  @keyframes stamppop {
+    from { transform: rotate(-8deg) scale(1.25); opacity: 0; }
+    to { transform: rotate(-8deg) scale(1); opacity: 1; }
+  }
+  .diffchip { display: inline-block; margin-top: 8px; font-size: 11px; font-weight: 600; color: var(--stamp); border: 1px solid var(--stamp); border-radius: 999px; padding: 1px 8px; }
+  .anote { margin-top: 6px; font-size: 12px; line-height: 1.6; color: var(--muted); text-align: left; white-space: normal; overflow-wrap: anywhere; }
+  .anote b { color: var(--ink); font-weight: 600; }
+
+  details.bg { margin-top: 12px; }
+  details.bg > summary { cursor: pointer; font-size: 13px; font-weight: 600; color: var(--muted); padding: 2px 0; }
+  details.bg[open] > summary { margin-bottom: 6px; }
+  .bgpanel { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .bgpanel p { font-size: 14px; }
+  .bgpanel p + p { margin-top: 8px; }
+
+  .copyblocks { margin-top: 14px; display: grid; gap: 10px; }
+  .copyblock { background: var(--bg); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; }
+  .cbhead { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px; justify-content: space-between; }
+  .cblabel { font-size: 12px; font-weight: 600; color: var(--muted); min-width: 0; overflow-wrap: anywhere; }
+  .cbtext { margin: 8px 0 0; font-family: var(--font-mono); font-size: 13px; line-height: 1.6; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+  .part + .part { margin-top: 20px; }
+  .part-label { font-size: 13px; font-weight: 600; color: var(--muted); margin-bottom: 8px; }
+  .opts { display: grid; gap: 10px; }
+  .opt { position: relative; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: start;
+    background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 12px 14px; cursor: pointer; }
+  .opt:hover { border-color: var(--muted); }
+  .opt:has(input[type="radio"]:checked) { border-color: var(--accent); background: var(--accent-soft); }
+  .opt:has(input[type="radio"]:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .opt input[type="radio"] { position: absolute; width: 1px; height: 1px; opacity: 0; margin: 0; }
+  .key { font-family: var(--font-mono); font-size: 13px; width: 28px; height: 28px; border-radius: 8px; border: 1px solid var(--line); background: var(--surface); display: grid; place-items: center; color: var(--ink); }
+  .key.wide { width: auto; padding: 0 8px; font-size: 11px; }
+  .opt:has(input[type="radio"]:checked) .key { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+  .obody { min-width: 0; }
+  .otitle { font-size: 16px; font-weight: 600; display: block; }
+  .oeffect { font-size: 14px; color: var(--muted); display: block; margin-top: 2px; }
+  .oeffect.req { color: var(--req); font-weight: 600; }
+  .badges { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+  .badge { display: inline-flex; align-items: center; gap: 4px; font-size: 11px; font-weight: 600; border-radius: 999px; padding: 2px 8px; white-space: nowrap; }
+  .badge.req { color: var(--req); background: var(--req-soft); }
+  .badge.ai { color: var(--ai); background: var(--ai-soft); }
+  .badge .spark { display: block; }
+  .custom-input { display: none; font: inherit; font-size: 14px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; margin-top: 8px; width: 100%; max-width: 24rem; }
+  .opt:has(input[type="radio"]:checked) .custom-input { display: block; }
+
+  .rationale { margin-top: 14px; background: var(--ai-soft); border-radius: 10px; padding: 10px 12px; }
+  .rationale .rh { font-size: 12px; font-weight: 600; color: var(--ai); }
+  .rationale p { font-size: 14px; margin-top: 4px; }
+  .reqmemo { margin-top: 14px; background: var(--req-soft); border-radius: 10px; padding: 10px 12px; }
+  .reqmemo .rh { font-size: 12px; font-weight: 600; color: var(--req); }
+  .reqmemo p { font-size: 14px; margin-top: 4px; }
+
+  .memo { margin-top: 14px; }
+  .memo-open { font: inherit; font-size: 13px; font-weight: 600; color: var(--accent); background: none; border: 0; padding: 4px 0; cursor: pointer; }
+  textarea { font: inherit; font-size: 15px; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 9px 11px; width: 100%; min-height: 3rem; resize: vertical; }
+  .memo textarea { margin-top: 6px; }
+  .flash { animation: apqflash 1.4s ease-out; }
+  @keyframes apqflash { 0%, 100% { background-color: transparent; } 15% { background-color: var(--accent-soft); } }
+
+  /* 요약 */
+  .sumsec { margin-top: 40px; }
+  .sumsec h2 { font-size: 20px; font-weight: 600; }
+  .sumsec .part-label { display: block; margin: 16px 0 6px; }
+  #apq-summary { font-family: var(--font-mono); font-size: 13px; line-height: 1.6; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; padding: 14px; margin: 14px 0 0; white-space: pre-wrap; overflow-wrap: anywhere; overflow-y: auto; max-height: 320px; }
+  .foot-note { font-size: 13px; color: var(--muted); margin-top: 14px; }
+
+  /* 버튼 */
+  .btn { font: inherit; font-weight: 600; font-size: 15px; border-radius: 10px; padding: 10px 18px; cursor: pointer; border: 1.5px solid var(--accent); background: transparent; color: var(--accent); }
+  .btn.primary { background: var(--accent); color: var(--on-accent); }
+  .btn.small { font-size: 13px; padding: 6px 12px; }
+  .btn.ghost { border-color: var(--line); color: var(--ink); background: var(--surface); }
+  .btn.lg { font-size: 16px; padding: 12px 24px; }
+  .btn[disabled] { opacity: 0.55; cursor: default; }
+
+  /* 모바일 상단 바 */
+  .mobilebar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20; background: var(--bg); border-bottom: 1px solid var(--line); padding: 10px 16px; }
+  .mbar-in { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+  .mbar-in .pbar { flex: 1 1 90px; min-width: 0; }
+  .mbar-in .count { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* 하단 액션 바 */
+  .actionbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 30; background: var(--surface); border-top: 1px solid var(--line);
+    padding: 12px clamp(16px, 4vw, 20px); padding-bottom: calc(12px + env(safe-area-inset-bottom, 0px)); }
+  .ab-in { max-width: 1160px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+  .ab-count { font-size: 14px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .ab-right { margin-left: auto; display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .ab-warn { font-size: 13px; color: var(--req); white-space: nowrap; }
+  .ab-count.ready { color: var(--ai); font-weight: 600; white-space: normal; }
+  .actionbar.pulse .btn { animation: abpulse 420ms ease-out; }
+  @keyframes abpulse {
+    0%, 100% { transform: scale(1); }
+    35% { transform: scale(1.07); }
+  }
+
+  .toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: calc(84px + env(safe-area-inset-bottom, 0px));
+    background: var(--ink); color: var(--bg); font-size: 14px; font-weight: 500; border-radius: 999px; padding: 10px 18px;
+    max-width: calc(100vw - 32px); text-align: center; opacity: 0; pointer-events: none; transition: opacity 0.18s ease; z-index: 40; }
+  .toast.show { opacity: 1; }
+
+  /* 잠금 */
+  .lock { min-height: 100vh; display: grid; place-items: center; padding: 24px 16px; }
+  .lockcard { width: 100%; max-width: 360px; background: var(--surface); border: 1px solid var(--line); border-radius: 16px; padding: 28px 22px; text-align: center; }
+  .lockcard .licon { color: var(--accent); }
+  .lockcard h1 { font-size: 20px; font-weight: 600; margin-top: 12px; }
+  .lockcard .ldesc { color: var(--muted); font-size: 14px; margin-top: 6px; }
+  .pin { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 22px; }
+  .pin-cell { height: 56px; border: 1px solid var(--line); border-radius: 12px; background: var(--bg); display: grid; place-items: center; font-family: var(--font-mono); font-size: 24px; color: var(--ink); }
+  .pin-cell.active { border-color: var(--accent); }
+  .pin input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; border: 0; background: transparent; font-size: 24px; }
+  .pin.shake { animation: pinshake 300ms ease; }
+  @keyframes pinshake {
+    0%, 100% { transform: translateX(0); }
+    20% { transform: translateX(-7px); }
+    40% { transform: translateX(7px); }
+    60% { transform: translateX(-5px); }
+    80% { transform: translateX(5px); }
+  }
+  .lock-err { color: var(--req); font-size: 13px; margin-top: 14px; min-height: 1.3em; }
+
+  @media (min-width: 1024px) {
+    .mobilebar { display: none; }
+    .app { display: grid; grid-template-columns: var(--rail) minmax(0, 1fr); gap: 40px; max-width: 1160px; margin: 0 auto; padding: 32px clamp(20px, 4vw, 40px) 0; }
+    .rail { display: block; position: sticky; top: 32px; align-self: start; }
+    .doc { max-width: 44rem; }
+    .card { scroll-margin-top: 24px; }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+  }
+</style>
+</head>
+<body>
+<div id="apq-root"></div>
+<script type="application/json" id="apq-payload">__APQ_PAYLOAD__</script>
+<script>
+(function () {
+  "use strict";
+
+  var SVG_NS = "http://www.w3.org/2000/svg";
+
+  var payload = {};
+  try { payload = JSON.parse(document.getElementById("apq-payload").textContent) || {}; } catch (e) { payload = {}; }
+  var root = document.getElementById("apq-root");
+  // 로컬 제출 서버가 페이지를 띄운 경우에만 채워진다. 없으면 지금까지의 복사 흐름 그대로다
+  var submitUrl = typeof payload.submit_url === "string" ? payload.submit_url : "";
+
+  // 화면 문구는 이 사전 하나에 모은다. 구조 줄(복사 텍스트 머리말)은 render.py 의 정규식과 맞춰 둔다
+  var I18N =   {
+    "ko": {
+      "docTitle": "{role} 결정 요청",
+      "lockPinLabel": "비밀번호 4자리",
+      "lockWrong": "비밀번호가 맞지 않습니다",
+      "confirm": "확인",
+      "lockTitleFallback": "결정 요청",
+      "lockPrompt": "전달받은 비밀번호 4자리를 입력해 주세요",
+      "deciderRole": "결정권자",
+      "unselectedLabel": "미선택",
+      "customLabel": "직접 입력",
+      "customShort": "직접",
+      "markSameTitle": "요청자와 같음",
+      "markMemoTitle": "요청자와 같음 · 메모 있음",
+      "markDiffTitle": "요청자와 다름",
+      "compareDiffRequester": "다름, 요청자: {label}",
+      "compareSameAi": "AI 권장과 같음",
+      "compareDiffAi": "다름, AI 권장: {label}",
+      "headerRequester": "[{title} 요청자 선택] {created}",
+      "headerDecider": "[{title} {role} 선택] {created}",
+      "requesterDiffCount": "요청자 선택과 다른 선택: {n}개",
+      "memoLine": "   메모: ",
+      "noteLine": "전체 메모: ",
+      "unselectedCount": "미선택: {n}개",
+      "codeLine": "선택 코드: ",
+      "toastCopiedRequester": "복사했어요. 에이전트 대화창에 붙여 넣어 주세요",
+      "toastCopiedDecider": "복사했어요. 요청한 분께 그대로 전달해 주세요",
+      "copiedCheck": "복사됨 ✓",
+      "copyResult": "결과 복사",
+      "toastCopyManual": "직접 복사해 주세요",
+      "submittedMsg": "전달했어요. 에이전트가 이어서 진행합니다. 이 창은 닫아도 됩니다",
+      "unselectedShort": "미선택 {n}개",
+      "toastSubmitFailed": "전달하지 못했어요. 결과 복사로 전달해 주세요",
+      "copy": "복사",
+      "copied": "복사됨",
+      "colRequester": "요청자",
+      "colAi": "AI",
+      "colMyPick": "내 선택",
+      "diffChip": "요청자와 다름",
+      "customNoteHead": "{label} 직접 입력",
+      "progressOf": "{total}개 중 {done}개",
+      "completeBar": "모두 골랐어요. 결과를 복사해 전달해 주세요",
+      "progressSelected": "{total}개 중 {done}개 선택",
+      "toastAllPicked": "모두 골랐어요. 아래 결과 복사를 눌러 주세요",
+      "requesterBadge": "요청자",
+      "requesterInputPrefix": "요청자 입력: ",
+      "aiBadge": "AI 권장",
+      "customPlaceholder": "직접 입력",
+      "customAria": "{label} 직접 입력값",
+      "rationaleHead": "AI 권장 이유",
+      "originJira": "지라",
+      "originSession": "세션",
+      "originDoc": "문서",
+      "originPrd": "PRD",
+      "backgroundShow": "배경 보기",
+      "requesterMemoHead": "요청자 메모",
+      "memoPlaceholder": "메모 (선택)",
+      "memoAria": "{title} 메모",
+      "memoAdd": "+ 메모 남기기",
+      "metaCreated": "작성 {date}",
+      "metaRequester": "요청자 {name}",
+      "sourcesHead": "근거: ",
+      "stepRequesterPick": "요청자 선택",
+      "stepDeciderPick": "{role} 선택",
+      "stepHandoff": "에이전트에 전달",
+      "legendRequesterPick": "요청자 선택",
+      "legendMyPick": "내 선택",
+      "markLegendSame": "✓ 요청자와 같음",
+      "markLegendMemo": "✎ 같지만 메모 있음",
+      "markLegendDiff": "≠ 요청자와 다름",
+      "requesterDiffSummary": "요청자 선택과 AI 권장이 다른 항목 {n}개",
+      "summaryHead": "전달할 내용",
+      "requesterNoteHead": "요청자 전체 메모",
+      "notePlaceholder": "전체 메모 (선택)",
+      "noteAria": "전체 메모",
+      "copyTargetHead": "복사될 내용",
+      "footNote": "선택 내용은 이 브라우저에만 임시로 남습니다. 복사한 내용을 상대방에게 전달해 주세요.",
+      "gotoUnselected": "미선택 항목으로",
+      "gotoUnselectedShort": "미선택으로",
+      "filterOnlyDifferences": "다른 항목만 보기",
+      "submitButton": "요청자 확인"
+    },
+    "en": {
+      "docTitle": "Decision request for {role}",
+      "lockPinLabel": "4-digit password",
+      "lockWrong": "That password is not right",
+      "confirm": "Confirm",
+      "lockTitleFallback": "Decision request",
+      "lockPrompt": "Enter the 4-digit password you were given",
+      "deciderRole": "Decider",
+      "unselectedLabel": "Not selected",
+      "customLabel": "Custom input",
+      "customShort": "Own",
+      "markSameTitle": "Same as the requester",
+      "markMemoTitle": "Same as the requester · has a memo",
+      "markDiffTitle": "Different from the requester",
+      "compareDiffRequester": "Different, requester: {label}",
+      "compareSameAi": "Same as the AI recommendation",
+      "compareDiffAi": "Different, AI recommendation: {label}",
+      "headerRequester": "[{title} requester pick] {created}",
+      "headerDecider": "[{title} {role} pick] {created}",
+      "requesterDiffCount": "Different from the requester: {n}",
+      "memoLine": "   Memo: ",
+      "noteLine": "Overall memo: ",
+      "unselectedCount": "Not selected: {n}",
+      "codeLine": "Selection code: ",
+      "toastCopiedRequester": "Copied. Paste it into the agent chat",
+      "toastCopiedDecider": "Copied. Pass it on to the person who asked",
+      "copiedCheck": "Copied ✓",
+      "copyResult": "Copy result",
+      "toastCopyManual": "Please copy it by hand",
+      "submittedMsg": "Sent. The agent continues from here; you can close this window",
+      "unselectedShort": "{n} not selected",
+      "toastSubmitFailed": "Could not send. Pass it on with Copy result",
+      "copy": "Copy",
+      "copied": "Copied",
+      "colRequester": "Requester",
+      "colAi": "AI",
+      "colMyPick": "My pick",
+      "diffChip": "Different from the requester",
+      "customNoteHead": "{label} custom input",
+      "progressOf": "{done} of {total}",
+      "completeBar": "All picked. Copy the result and pass it on",
+      "progressSelected": "{done} of {total} selected",
+      "toastAllPicked": "All picked. Press Copy result below",
+      "requesterBadge": "Requester",
+      "requesterInputPrefix": "Requester input: ",
+      "aiBadge": "AI recommendation",
+      "customPlaceholder": "Custom input",
+      "customAria": "{label} custom value",
+      "rationaleHead": "Why the AI recommends it",
+      "originJira": "Jira",
+      "originSession": "Session",
+      "originDoc": "Doc",
+      "originPrd": "PRD",
+      "backgroundShow": "Show background",
+      "requesterMemoHead": "Requester memo",
+      "memoPlaceholder": "Memo (optional)",
+      "memoAria": "{title} memo",
+      "memoAdd": "+ Add a memo",
+      "metaCreated": "Written {date}",
+      "metaRequester": "Requester {name}",
+      "sourcesHead": "Sources: ",
+      "stepRequesterPick": "Requester pick",
+      "stepDeciderPick": "{role} pick",
+      "stepHandoff": "Hand off to the agent",
+      "legendRequesterPick": "Requester pick",
+      "legendMyPick": "My pick",
+      "markLegendSame": "✓ Same as the requester",
+      "markLegendMemo": "✎ Same, has a memo",
+      "markLegendDiff": "≠ Different from the requester",
+      "requesterDiffSummary": "Items where the requester pick differs from the AI recommendation: {n}",
+      "summaryHead": "What to pass on",
+      "requesterNoteHead": "Requester overall memo",
+      "notePlaceholder": "Overall memo (optional)",
+      "noteAria": "Overall memo",
+      "copyTargetHead": "What gets copied",
+      "footNote": "Your picks stay in this browser only. Pass the copied text on to the other side.",
+      "gotoUnselected": "Next unpicked",
+      "gotoUnselectedShort": "Next unpicked",
+      "filterOnlyDifferences": "Only differing items",
+      "submitButton": "Confirm as requester"
+    }
+  };
+  var lang = I18N[payload.lang] ? payload.lang : "ko";
+  var T = I18N[lang];
+
+  function t(key) { return T[key] === undefined ? key : T[key]; }
+
+  function tf(key, vars) {
+    var out = t(key);
+    Object.keys(vars || {}).forEach(function (name) {
+      out = out.split("{" + name + "}").join(String(vars[name]));
+    });
+    return out;
+  }
+
+  function el(tag, attrs, children) {
+    var node = document.createElement(tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (key) {
+        var value = attrs[key];
+        if (value === null || value === undefined || value === false) return;
+        if (key === "class") node.className = value;
+        else if (key === "text") node.textContent = String(value);
+        else if (key === "for") node.htmlFor = value;
+        else if (key.slice(0, 2) === "on") node.addEventListener(key.slice(2), value);
+        else node.setAttribute(key, value === true ? "" : String(value));
+      });
+    }
+    (children || []).forEach(function (child) { if (child) node.appendChild(child); });
+    return node;
+  }
+
+  function svgNode(tag, attrs, children) {
+    var node = document.createElementNS(SVG_NS, tag);
+    if (attrs) {
+      Object.keys(attrs).forEach(function (key) {
+        var value = attrs[key];
+        if (value === null || value === undefined || value === false) return;
+        node.setAttribute(key, value === true ? "" : String(value));
+      });
+    }
+    (children || []).forEach(function (child) { if (child) node.appendChild(child); });
+    return node;
+  }
+
+  function sparkle() {
+    return svgNode("svg", { class: "spark", viewBox: "0 0 12 12", width: "11", height: "11", "aria-hidden": "true", focusable: "false" }, [
+      svgNode("path", { d: "M6 0.6 7.2 4.8 11.4 6 7.2 7.2 6 11.4 4.8 7.2 0.6 6 4.8 4.8Z", fill: "currentColor" }),
+    ]);
+  }
+
+  function lockIcon() {
+    return svgNode("svg", { class: "licon", viewBox: "0 0 24 24", width: "30", height: "30", "aria-hidden": "true", focusable: "false",
+      fill: "none", stroke: "currentColor", "stroke-width": "1.8", "stroke-linecap": "round", "stroke-linejoin": "round" }, [
+      svgNode("rect", { x: "4", y: "10.5", width: "16", height: "10", rx: "2.5" }),
+      svgNode("path", { d: "M8 10.5V7.5a4 4 0 0 1 8 0v3" }),
+    ]);
+  }
+
+  function letterOf(id) { return String(id).toUpperCase(); }
+
+  function deciderRole(meta) {
+    meta = meta || {};
+    var role = String(meta.decider_role || "").trim();
+    if (role) return role;
+    // Pages written before the decider role existed carry only meta.po, which was always a PO.
+    return meta.po ? "PO" : t("deciderRole");
+  }
+
+  function deciderName(meta) {
+    meta = meta || {};
+    return meta.decider || meta.po || "";
+  }
+
+  function b64ToBytes(b64) {
+    var bin = atob(b64);
+    var out = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) out[i] = bin.charCodeAt(i);
+    return out;
+  }
+
+  function decrypt(blob, pin) {
+    var km = crypto.subtle.importKey("raw", new TextEncoder().encode(pin), "PBKDF2", false, ["deriveKey"]);
+    return km.then(function (material) {
+      return crypto.subtle.deriveKey(
+        { name: "PBKDF2", salt: b64ToBytes(blob.salt), iterations: blob.iterations || 200000, hash: "SHA-256" },
+        material, { name: "AES-GCM", length: 256 }, false, ["decrypt"]);
+    }).then(function (key) {
+      return crypto.subtle.decrypt({ name: "AES-GCM", iv: b64ToBytes(blob.iv) }, key, b64ToBytes(blob.ct));
+    }).then(function (buf) {
+      return JSON.parse(new TextDecoder().decode(buf));
+    });
+  }
+
+  function lockScreen(blob) {
+    var input = el("input", { id: "apq-lock-pin", type: "text", inputmode: "numeric", pattern: "[0-9]*",
+      maxlength: "4", autocomplete: "one-time-code", autocapitalize: "off", spellcheck: "false", "aria-label": t("lockPinLabel") });
+    var pin = el("div", { class: "pin" });
+    var cells = [];
+    for (var i = 0; i < 4; i++) {
+      var cell = el("span", { class: "pin-cell" });
+      cells.push(cell);
+      pin.appendChild(cell);
+    }
+    pin.appendChild(input);
+    var error = el("p", { class: "lock-err", role: "alert" });
+    var busy = false;
+
+    function activeIndex() { return Math.min(input.value.length, 3); }
+
+    function sync() {
+      var clean = input.value.replace(/[^0-9]/g, "").slice(0, 4);
+      if (clean !== input.value) input.value = clean;
+      var active = document.activeElement === input;
+      cells.forEach(function (node, index) {
+        node.textContent = clean.charAt(index);
+        node.classList.toggle("active", active && index === activeIndex());
+      });
+    }
+
+    function submit() {
+      var value = input.value.trim();
+      if (!/^[0-9]{4}$/.test(value)) {
+        error.textContent = value ? t("lockWrong") : "";
+        return;
+      }
+      if (busy) return;
+      busy = true;
+      error.textContent = "";
+      input.disabled = true;
+      decrypt(blob, value).then(function (data) {
+        root.innerHTML = "";
+        boot(data);
+      }).catch(function () {
+        busy = false;
+        input.disabled = false;
+        input.value = "";
+        sync();
+        error.textContent = t("lockWrong");
+        pin.classList.remove("shake");
+        void pin.offsetWidth;
+        pin.classList.add("shake");
+        setTimeout(function () { pin.classList.remove("shake"); }, 350);
+        input.focus();
+      });
+    }
+
+    input.addEventListener("input", function () {
+      sync();
+      if (input.value.length === 4) submit();
+    });
+    input.addEventListener("focus", sync);
+    input.addEventListener("blur", sync);
+
+    var form = el("form", { class: "lock-form", onsubmit: function (event) {
+      event.preventDefault();
+      submit();
+    } }, [pin, el("button", { type: "submit", class: "sr-only", text: t("confirm") })]);
+
+    root.appendChild(el("div", { class: "lock" }, [
+      el("div", { class: "lockcard" }, [
+        lockIcon(),
+        el("h1", { text: blob.title || t("lockTitleFallback") }),
+        el("p", { class: "ldesc", text: t("lockPrompt") }),
+        form,
+        error,
+      ]),
+    ]));
+    input.focus();
+  }
+
+  function samePick(a, b) {
+    if (!a || !b) return false;
+    if (a.c !== b.c) return false;
+    if (a.c === "x") return String(a.x || "").trim() === String(b.x || "").trim();
+    return true;
+  }
+
+  function optionOf(part, id) {
+    var list = part.options || [];
+    for (var i = 0; i < list.length; i++) if (list[i].id === id) return list[i];
+    return null;
+  }
+
+  function labelOf(part, pick) {
+    if (!pick) return t("unselectedLabel");
+    if (pick.c === "x") {
+      var v = String(pick.x || "").trim();
+      return v || t("customLabel");
+    }
+    var opt = optionOf(part, pick.c);
+    return opt ? opt.label : pick.c;
+  }
+
+  function sanitizeCode(value) {
+    return String(value === undefined || value === null ? "" : value).replace(/[;|()]/g, " ").trim();
+  }
+
+  function codeOf(pick) {
+    if (pick.c !== "x") return pick.c;
+    var v = sanitizeCode(pick.x);
+    return v ? "x(" + v + ")" : "x";
+  }
+
+  function pickKey(pick) {
+    if (!pick) return "";
+    return pick.c === "x" ? "x:" + String(pick.x || "").trim() : pick.c;
+  }
+
+  function boot(data) {
+    var meta = data.meta || {};
+    var decisions = data.decisions || [];
+    var requesterPicks = (data.requester_picks && Object.keys(data.requester_picks).length) ? data.requester_picks : null;
+    var phase = (requesterPicks || data.skip_requester) ? "decider" : "requester";
+    var storeKey = "apq:" + (meta.name || "") + ":v" + (meta.version || 1) + ":" + phase;
+
+    var state = { picks: {}, memos: {}, note: "" };
+    var restored = false;
+    try {
+      var raw = localStorage.getItem(storeKey);
+      if (raw) {
+        var saved = JSON.parse(raw);
+        if (saved && saved.picks && typeof saved.picks === "object") { state = saved; restored = true; }
+      }
+    } catch (e) {}
+    if (!restored && phase === "requester" && data.requester_draft) {
+      var draft = data.requester_draft;
+      Object.keys(draft.picks || {}).forEach(function (id) {
+        var pick = draft.picks[id];
+        if (!pick || !pick.c) return;
+        state.picks[id] = { c: pick.c };
+        if (pick.x !== undefined && pick.x !== null) state.picks[id].x = pick.x;
+      });
+      Object.keys(draft.memos || {}).forEach(function (id) {
+        var memo = draft.memos[id];
+        if (memo === undefined || memo === null) return;
+        state.memos[id] = String(memo);
+      });
+      if (draft.note !== undefined && draft.note !== null) state.note = String(draft.note);
+    }
+
+    var role = deciderRole(meta);
+    document.title = meta.title || tf("docTitle", { role: role });
+
+    var parts = [];
+    decisions.forEach(function (dec) {
+      var dp = dec.parts || [];
+      dp.forEach(function (part) { parts.push({ part: part, dec: dec, multi: dp.length > 1 }); });
+    });
+
+    var ui = {};
+    var animateId = null;
+    var completeSeen = null;
+    var submitMode = phase === "requester" && !!submitUrl;
+    var submitted = false;
+
+    function requesterDiffers(part) {
+      var rp = requesterPicks && requesterPicks[part.id];
+      return !!(rp && part.recommended && rp.c !== part.recommended);
+    }
+
+    function countRequesterDiffers() {
+      var n = 0;
+      parts.forEach(function (x) { if (requesterDiffers(x.part)) n++; });
+      return n;
+    }
+
+    // 요청자 단계를 건너뛴 페이지에는 견줄 요청자 선택이 없어 "다른 항목"의 기준이 AI 권장뿐이다
+    function referenceDiffers(part) {
+      if (requesterPicks) return requesterDiffers(part);
+      var mine = state.picks[part.id];
+      return !!(part.recommended && mine && mine.c !== part.recommended);
+    }
+
+    function countPoDiffers() {
+      var n = 0;
+      if (!requesterPicks) return 0;
+      parts.forEach(function (x) {
+        var rp = requesterPicks[x.part.id];
+        var pick = state.picks[x.part.id];
+        if (rp && pick && !samePick(rp, pick)) n++;
+      });
+      return n;
+    }
+
+    function compareMark(part, pick) {
+      if (phase === "decider" && requesterPicks) {
+        var rp = requesterPicks[part.id];
+        if (!rp) return null;
+        return samePick(rp, pick) ? t("markSameTitle") : tf("compareDiffRequester", { label: labelOf(part, rp) });
+      }
+      if (!part.recommended) return null;
+      return pick.c === part.recommended ? t("compareSameAi") : tf("compareDiffAi", { label: labelOf(part, { c: part.recommended }) });
+    }
+
+    function buildText() {
+      var lines = [];
+      lines.push(phase === "decider"
+        ? tf("headerDecider", { title: meta.title || "", role: role, created: meta.created || "" })
+        : tf("headerRequester", { title: meta.title || "", created: meta.created || "" }));
+      if (phase === "decider" && requesterPicks) lines.push(tf("requesterDiffCount", { n: countPoDiffers() }));
+      var unselected = 0;
+      decisions.forEach(function (dec, index) {
+        var dp = dec.parts || [];
+        var segs = [];
+        dp.forEach(function (part) {
+          var pick = state.picks[part.id];
+          if (!pick) {
+            unselected++;
+            segs.push(dp.length > 1 ? part.label + ": " + t("unselectedLabel") : t("unselectedLabel"));
+            return;
+          }
+          var value = labelOf(part, pick);
+          if (dp.length > 1) value = part.label + ": " + value;
+          var mark = compareMark(part, pick);
+          if (mark) value += " [" + mark + "]";
+          segs.push(value);
+        });
+        var line = (index + 1) + ". " + (dec.title || "") + " - " + segs.join(" / ");
+        var memo = state.memos[dec.id];
+        if (memo && String(memo).trim()) line += "\n" + t("memoLine") + String(memo).trim().replace(/\n+/g, " ");
+        lines.push(line);
+      });
+      if (state.note && String(state.note).trim()) lines.push(t("noteLine") + String(state.note).trim().replace(/\n+/g, " "));
+      if (unselected > 0) lines.push(tf("unselectedCount", { n: unselected }));
+      var codes = [];
+      parts.forEach(function (x) {
+        var pick = state.picks[x.part.id];
+        if (pick) codes.push(x.part.id + "=" + codeOf(pick));
+      });
+      lines.push(t("codeLine") + "apq|" + (meta.name || "") + "|v" + (meta.version || 1) + "|" + phase + "|" + codes.join(";"));
+      return lines.join("\n");
+    }
+
+    function persist() {
+      try { localStorage.setItem(storeKey, JSON.stringify(state)); } catch (e) {}
+    }
+
+    /* --- 요약 · 복사 --- */
+    var summaryEl = el("pre", { id: "apq-summary" });
+    var toastEl = el("div", { class: "toast", role: "status", "aria-live": "polite" });
+    var toastTimer = null;
+    var abRevert = null;
+
+    function toast(message) {
+      toastEl.textContent = message;
+      toastEl.classList.add("show");
+      if (toastTimer) clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, 2400);
+    }
+
+    function copyToClipboard(text, done, failed) {
+      function fallback() {
+        var holder = document.createElement("textarea");
+        holder.value = text;
+        holder.setAttribute("readonly", "");
+        holder.style.position = "fixed";
+        holder.style.top = "-1000px";
+        document.body.appendChild(holder);
+        holder.select();
+        holder.setSelectionRange(0, holder.value.length);
+        var ok = false;
+        try { ok = document.execCommand("copy"); } catch (e) { ok = false; }
+        document.body.removeChild(holder);
+        if (ok) { done(); return; }
+        failed();
+      }
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, fallback);
+      } else {
+        fallback();
+      }
+    }
+
+    function copyText() {
+      function done() {
+        toast(phase === "requester" ? t("toastCopiedRequester") : t("toastCopiedDecider"));
+        if (abRevert) clearTimeout(abRevert);
+        abBtn.textContent = t("copiedCheck");
+        abRevert = setTimeout(function () { abBtn.textContent = t("copyResult"); }, 2000);
+      }
+      function failed() {
+        try {
+          var range = document.createRange();
+          range.selectNodeContents(summaryEl);
+          var sel = window.getSelection();
+          sel.removeAllRanges();
+          sel.addRange(range);
+        } catch (e) {}
+        toast(t("toastCopyManual"));
+      }
+      copyToClipboard(summaryEl.textContent, done, failed);
+    }
+
+    function markSubmitted() {
+      abCount.textContent = t("submittedMsg");
+      abCount.classList.add("ready");
+      abWarn.textContent = "";
+      abSubmit.disabled = true;
+      abBtn.disabled = true;
+    }
+
+    function submitReply() {
+      var unselected = 0;
+      parts.forEach(function (x) { if (!state.picks[x.part.id]) unselected++; });
+      // 미선택은 confirm 으로 막지 않는다. 바 안 경고만 남기고 그대로 보낼 수 있게 둔다
+      abWarn.textContent = unselected > 0 ? tf("unselectedShort", { n: unselected }) : "";
+      abSubmit.disabled = true;
+      fetch(submitUrl, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain" },
+        body: buildText(),
+      }).then(function (res) {
+        if (!res.ok) throw new Error("status " + res.status);
+        submitted = true;
+        markSubmitted();
+      }).catch(function () {
+        abSubmit.disabled = false;
+        toast(t("toastSubmitFailed"));
+      });
+    }
+
+    function copyBlockNode(block) {
+      var text = String(block.text === undefined || block.text === null ? "" : block.text);
+      var button = el("button", { type: "button", class: "btn ghost small", text: t("copy") });
+      var revert = null;
+      button.addEventListener("click", function () {
+        copyToClipboard(text, function () {
+          button.textContent = t("copied");
+          if (revert) clearTimeout(revert);
+          revert = setTimeout(function () { button.textContent = t("copy"); }, 1600);
+        }, function () { toast(t("toastCopyManual")); });
+      });
+      return el("div", { class: "copyblock" }, [
+        el("div", { class: "cbhead" }, [el("span", { class: "cblabel", text: block.label || "" }), button]),
+        el("pre", { class: "cbtext", text: text }),
+      ]);
+    }
+
+    /* --- 진행 · 상태 --- */
+    var railCount = el("div", { class: "count" });
+    var railFill = el("i");
+    var railPbar = el("div", { class: "pbar" }, [railFill]);
+    var mCount = el("span", { class: "count" });
+    var mFill = el("i");
+    var mPbar = el("div", { class: "pbar" }, [mFill]);
+    var abCount = el("span", { class: "ab-count" });
+    var abWarn = el("span", { class: "ab-warn" });
+
+    // 칸 폭이 좁아 값을 담지 못하므로 표지만 두고, 값은 비교 행 아래 approvalNotes 줄이 전부 보여 준다
+    function approvalCell(pick, stamp, pop) {
+      if (!pick) return el("span", { class: "cell empty" });
+      var custom = pick.c === "x" ? String(pick.x || "").trim() : "";
+      var attrs = { class: stamp ? "cell stamp" + (pop ? " pop" : "") : "cell" };
+      if (custom) attrs.title = custom;
+      return el("span", attrs, [
+        el("span", { class: "ctext", text: pick.c === "x" ? t("customShort") : letterOf(pick.c) }),
+      ]);
+    }
+
+    // 결정권자 칸은 칸마다 그 part 의 요청자 일치를 색과 모서리 기호로 직접 보여 준다
+    function pickMark(rp, mine, memoed) {
+      if (!rp) return null;
+      if (!samePick(rp, mine)) return { cls: "diff", glyph: "≠", title: t("markDiffTitle") };
+      if (memoed) return { cls: "memo", glyph: "✎", title: t("markMemoTitle") };
+      return { cls: "same", glyph: "✓", title: t("markSameTitle") };
+    }
+
+    function markBadge(mark) {
+      return el("span", { class: "cmark " + mark.cls, title: mark.title, text: mark.glyph });
+    }
+
+    function renderApproval(dec) {
+      var entry = ui["dec:" + dec.id];
+      entry.approval.textContent = "";
+      entry.diff.textContent = "";
+      var dp = dec.parts || [];
+      var multi = dp.length > 1;
+      var head = el("div", { class: "arow head" });
+      if (multi) head.appendChild(el("span", { class: "alabel" }));
+      var columns = phase === "decider" ? (requesterPicks ? [t("colRequester"), t("colAi"), role] : [t("colAi"), role]) : [t("colMyPick"), t("colAi")];
+      columns.forEach(function (name) {
+        head.appendChild(el("span", { class: "acol", text: name }));
+      });
+      entry.approval.appendChild(head);
+      var memoed = !!(state.memos[dec.id] && String(state.memos[dec.id]).trim());
+      var diffCount = 0;
+      dp.forEach(function (part) {
+        var row = el("div", { class: "arow" });
+        if (multi) row.appendChild(el("span", { class: "alabel", text: part.label || part.id }));
+        var mine = state.picks[part.id];
+        if (phase === "decider") {
+          var rp = requesterPicks && requesterPicks[part.id];
+          if (requesterPicks) row.appendChild(el("span", { class: "acol" }, [approvalCell(rp)]));
+          row.appendChild(el("span", { class: "acol" }, [part.recommended ? approvalCell({ c: part.recommended }) : el("span", { class: "cell empty" })]));
+          if (mine) {
+            var mark = pickMark(rp, mine, memoed);
+            var cell = approvalCell(mine, true, animateId === part.id);
+            var acol = el("span", { class: mark ? "acol marked" : "acol" }, [cell]);
+            if (mark) {
+              if (mark.cls === "diff") diffCount++;
+              cell.classList.add(mark.cls);
+              acol.appendChild(markBadge(mark));
+            }
+            row.appendChild(acol);
+          } else {
+            row.appendChild(el("span", { class: "acol" }, [el("span", { class: "cell empty" })]));
+          }
+        } else {
+          row.appendChild(el("span", { class: "acol" }, [approvalCell(mine)]));
+          row.appendChild(el("span", { class: "acol" }, [part.recommended ? approvalCell({ c: part.recommended }) : el("span", { class: "cell empty" })]));
+        }
+        entry.approval.appendChild(row);
+      });
+      approvalNotes(dec);
+      if (diffCount) entry.diff.appendChild(el("span", { class: "diffchip", text: t("diffChip") + (multi ? " " + diffCount : "") }));
+    }
+
+    // 직접 입력은 칸에 "직접" 표지만 남으므로 값 전부를 카드 본문 폭 줄로 내려 적는다
+    function approvalNotes(dec) {
+      var entry = ui["dec:" + dec.id];
+      entry.anotes.textContent = "";
+      var dp = dec.parts || [];
+      var multi = dp.length > 1;
+      var lines = [];
+      dp.forEach(function (part) {
+        var mine = state.picks[part.id];
+        var cols = [];
+        if (phase === "decider") {
+          var rp = requesterPicks && requesterPicks[part.id];
+          if (requesterPicks) cols.push({ label: t("colRequester"), pick: rp });
+          cols.push({ label: role, pick: mine });
+        } else {
+          cols.push({ label: t("colMyPick"), pick: mine });
+        }
+        cols.forEach(function (col) {
+          if (!col.pick || col.pick.c !== "x") return;
+          var value = String(col.pick.x || "").trim();
+          if (!value) return;
+          var head = tf("customNoteHead", { label: col.label });
+          if (multi) head += " · " + (part.label || part.id);
+          lines.push({ head: head + ": ", value: value });
+        });
+      });
+      lines.forEach(function (line) {
+        entry.anotes.appendChild(el("div", { class: "anote" }, [
+          el("span", { text: line.head }),
+          el("b", { text: line.value }),
+        ]));
+      });
+      entry.anotes.hidden = !lines.length;
+    }
+
+    function renderDot(dec) {
+      var entry = ui["dec:" + dec.id];
+      if (!entry || !entry.dot) return;
+      var differs = false;
+      var all = true;
+      (dec.parts || []).forEach(function (part) {
+        var mine = state.picks[part.id];
+        if (!mine) { all = false; return; }
+        var rp = requesterPicks && requesterPicks[part.id];
+        if (phase === "decider" && rp && !samePick(rp, mine)) differs = true;
+      });
+      entry.dot.className = "dot" + (differs ? " stamp" : (all ? " done" : ""));
+    }
+
+    function update() {
+      var done = 0;
+      parts.forEach(function (x) { if (state.picks[x.part.id]) done++; });
+      var total = parts.length;
+      var unselected = total - done;
+      var pct = total ? (done / total * 100) + "%" : "0%";
+      railCount.textContent = tf("progressOf", { total: total, done: done });
+      mCount.textContent = done + "/" + total;
+      railFill.style.width = pct;
+      mFill.style.width = pct;
+      var complete = total > 0 && unselected === 0;
+      abCount.textContent = complete ? t("completeBar") : tf("progressSelected", { total: total, done: done });
+      abCount.classList.toggle("ready", complete);
+      abWarn.textContent = unselected > 0 ? tf("unselectedShort", { n: unselected }) : "";
+      abBtn.classList.toggle("primary", complete);
+      // 복원 직후(completeSeen === null)의 완료 상태는 알림 없이 그리기만 하고, 미선택이 다시 0 이 된 순간에만 한 번 알린다
+      if (completeSeen === false && complete) {
+        actionbar.classList.remove("pulse");
+        void actionbar.offsetWidth;
+        actionbar.classList.add("pulse");
+        setTimeout(function () { actionbar.classList.remove("pulse"); }, 520);
+        toast(t("toastAllPicked"));
+      }
+      completeSeen = complete;
+      summaryEl.textContent = buildText();
+      decisions.forEach(function (dec) { renderApproval(dec); renderDot(dec); });
+      animateId = null;
+      if (submitted) markSubmitted();
+      persist();
+    }
+
+    function setPick(partId, pick) {
+      state.picks[partId] = pick;
+      animateId = partId;
+      update();
+    }
+
+    function clearPick(partId) {
+      delete state.picks[partId];
+      update();
+    }
+
+    function optionNode(part, opt, custom) {
+      var inputId = "apq-" + part.id + "-" + opt.id;
+      var radio = el("input", { type: "radio", name: "apq-r-" + part.id, value: opt.id, id: inputId });
+      var key = custom ? el("span", { class: "key wide", text: t("customShort") }) : el("span", { class: "key", text: letterOf(opt.id) });
+      var body = el("div", { class: "obody" }, [el("span", { class: "otitle", text: opt.label })]);
+      if (opt.effect) body.appendChild(el("span", { class: "oeffect", text: opt.effect }));
+      var badges = el("div", { class: "badges" });
+      var requesterPick = requesterPicks && requesterPicks[part.id];
+      if (custom && requesterPick && requesterPick.c === "x") {
+        badges.appendChild(el("span", { class: "badge req", text: t("requesterBadge") }));
+        var requesterCustom = String(requesterPick.x || "").trim();
+        if (requesterCustom) {
+          body.appendChild(el("span", { class: "oeffect req", text: t("requesterInputPrefix") + requesterCustom }));
+        }
+      } else if (!custom && requesterPick && requesterPick.c === opt.id) {
+        badges.appendChild(el("span", { class: "badge req", text: t("requesterBadge") }));
+      }
+      if (part.recommended === opt.id) {
+        var aiBadge = el("span", { class: "badge ai" }, [sparkle(), el("span", { text: t("aiBadge") })]);
+        badges.appendChild(aiBadge);
+      }
+      var label = el("label", { class: "opt", for: inputId }, [radio, key, body, badges]);
+      ui[part.id].radios[opt.id] = radio;
+      if (custom) {
+        var text = el("input", { type: "text", class: "custom-input", placeholder: t("customPlaceholder"),
+          "aria-label": tf("customAria", { label: part.label || part.id }) });
+        ui[part.id].custom = text;
+        text.addEventListener("input", function () {
+          radio.checked = true;
+          setPick(part.id, { c: "x", x: text.value });
+        });
+        body.appendChild(text);
+        radio.addEventListener("change", function () { setPick(part.id, { c: "x", x: text.value }); });
+      } else {
+        radio.addEventListener("change", function () { setPick(part.id, { c: opt.id }); });
+      }
+      return label;
+    }
+
+    function partNode(part, multi) {
+      var box = el("div", { class: "part", id: "apq-part-" + part.id });
+      if (multi) box.appendChild(el("div", { class: "part-label", text: part.label || part.id }));
+      var opts = el("div", { class: "opts" });
+      (part.options || []).forEach(function (opt) { opts.appendChild(optionNode(part, opt, false)); });
+      if (part.allow_custom) opts.appendChild(optionNode(part, { id: "x", label: t("customLabel"), effect: "" }, true));
+      box.appendChild(opts);
+      if (part.rationale) {
+        box.appendChild(el("div", { class: "rationale" }, [
+          el("div", { class: "rh", text: t("rationaleHead") }),
+          el("p", { text: part.rationale }),
+        ]));
+      }
+      return box;
+    }
+
+    function decisionNode(dec, index) {
+      var card = el("section", { class: "card", id: "apq-dec-" + dec.id });
+      var htext = el("div", { class: "htext" });
+      var top = el("div", {}, [el("span", { class: "cnum", text: "D" + (index + 1) })]);
+      var origin = dec.origin === "jira" ? t("originJira") : dec.origin === "session" ? t("originSession") : dec.origin === "doc" ? t("originDoc") : t("originPrd");
+      var kind = dec.origin === "jira" ? "jira" : dec.origin === "session" ? "session" : "prd";
+      top.appendChild(el("span", { class: "chip " + kind, text: dec.origin_label || origin }));
+      htext.appendChild(top);
+      htext.appendChild(el("h3", { class: "ctitle", text: dec.title || "" }));
+      if (dec.question) htext.appendChild(el("p", { class: "cquestion", text: dec.question }));
+      if ((dec.sources || []).length) {
+        var srcBits = [];
+        (dec.sources || []).forEach(function (s, i) {
+          if (i) srcBits.push(document.createTextNode(" · "));
+          if (s.url) srcBits.push(el("a", { href: s.url, target: "_blank", rel: "noopener noreferrer", text: s.label || s.url }));
+          else srcBits.push(el("span", { text: s.label || "" }));
+        });
+        htext.appendChild(el("p", { class: "src" }, srcBits));
+      }
+      var approval = el("div", { class: "approval" });
+      var diff = el("div", {});
+      // 메모 줄은 .cside (flex: 0 0 auto) 안에 두면 카드 폭을 밀어내므로 카드 본문 폭을 쓰는 형제로 둔다
+      var anotes = el("div", { class: "anotes", hidden: true });
+      card.appendChild(el("div", { class: "chead" }, [htext, el("div", { class: "cside" }, [approval, diff])]));
+      card.appendChild(anotes);
+
+      if ((dec.background || []).length) {
+        var details = el("details", { class: "bg" });
+        details.appendChild(el("summary", { text: t("backgroundShow") }));
+        var panel = el("div", { class: "bgpanel" });
+        (dec.background || []).forEach(function (para) { panel.appendChild(el("p", { text: para })); });
+        details.appendChild(panel);
+        card.appendChild(details);
+      }
+
+      if ((dec.copy_blocks || []).length) {
+        var blocks = el("div", { class: "copyblocks" });
+        (dec.copy_blocks || []).forEach(function (block) { blocks.appendChild(copyBlockNode(block)); });
+        card.appendChild(blocks);
+      }
+
+      var dp = dec.parts || [];
+      dp.forEach(function (part) {
+        ui[part.id] = { radios: {}, custom: null, anchor: null };
+        var node = partNode(part, dp.length > 1);
+        ui[part.id].anchor = node;
+        card.appendChild(node);
+      });
+
+      var requesterMemo = phase === "decider" && (data.requester_memos || {})[dec.id];
+      if (requesterMemo) {
+        card.appendChild(el("div", { class: "reqmemo" }, [
+          el("div", { class: "rh", text: t("requesterMemoHead") }),
+          el("p", { text: String(requesterMemo) }),
+        ]));
+      }
+
+      var memo = el("textarea", { rows: "2", placeholder: t("memoPlaceholder"), "aria-label": tf("memoAria", { title: dec.title || "" }) });
+      memo.value = state.memos[dec.id] || "";
+      memo.addEventListener("input", function () {
+        if (memo.value.trim()) state.memos[dec.id] = memo.value; else delete state.memos[dec.id];
+        update();
+      });
+      var openBtn = el("button", { type: "button", class: "memo-open", text: t("memoAdd") });
+      openBtn.addEventListener("click", function () {
+        openBtn.hidden = true;
+        memo.hidden = false;
+        memo.focus();
+      });
+      memo.hidden = true;
+      if (memo.value.trim()) { openBtn.hidden = true; memo.hidden = false; }
+      card.appendChild(el("div", { class: "memo" }, [openBtn, memo]));
+
+      ui["dec:" + dec.id] = { node: card, approval: approval, diff: diff, anotes: anotes, dot: null };
+      return card;
+    }
+
+    /* --- 카드 --- */
+    var cardList = el("main");
+    decisions.forEach(function (dec, index) { cardList.appendChild(decisionNode(dec, index)); });
+
+    /* --- 머리 --- */
+    var head = el("header", { class: "doc-head" });
+    head.appendChild(el("h1", { class: "title", text: meta.title || tf("docTitle", { role: role }) }));
+    var metaBits = [];
+    if (meta.created) metaBits.push(tf("metaCreated", { date: meta.created }));
+    if (meta.requester) metaBits.push(tf("metaRequester", { name: meta.requester }));
+    if (deciderName(meta)) metaBits.push(role + ' ' + deciderName(meta));
+    if (metaBits.length) head.appendChild(el("p", { class: "meta", text: metaBits.join(" · ") }));
+    (meta.intro || []).forEach(function (para) { head.appendChild(el("p", { class: "lead", text: para })); });
+    if ((meta.sources || []).length) {
+      var metaSrc = [document.createTextNode(t("sourcesHead"))];
+      (meta.sources || []).forEach(function (s, i) {
+        if (i) metaSrc.push(document.createTextNode(" · "));
+        if (s.url) metaSrc.push(el("a", { href: s.url, target: "_blank", rel: "noopener noreferrer", text: s.label || s.url }));
+        else metaSrc.push(el("span", { text: s.label || "" }));
+      });
+      head.appendChild(el("p", { class: "src" }, metaSrc));
+    }
+
+    var skipRequesterStep = !!data.skip_requester;
+    var stepNames = skipRequesterStep
+      ? [tf("stepDeciderPick", { role: role }), t("stepHandoff")]
+      : [t("stepRequesterPick"), tf("stepDeciderPick", { role: role }), t("stepHandoff")];
+    var nowStep = phase === "decider" ? (skipRequesterStep ? 0 : 1) : 0;
+    var steps = el("div", { class: "steps" });
+    stepNames.forEach(function (name, index) {
+      if (index) steps.appendChild(el("span", { class: "sep", text: "→" }));
+      var isNow = index === nowStep;
+      steps.appendChild(el("span", { class: "step" + (isNow ? " now" : "") }, [
+        el("span", { class: "snum", text: String(index + 1) }),
+        el("span", { text: name }),
+      ]));
+    });
+    head.appendChild(steps);
+
+    var legend = el("div", { class: "legend" });
+    if (phase === "requester" || requesterPicks) {
+      legend.appendChild(el("span", { class: "chip req", text: t(requesterPicks ? "legendRequesterPick" : "legendMyPick") }));
+    }
+    legend.appendChild(el("span", { class: "chip ai" }, [sparkle(), el("span", { text: t("aiBadge") })]));
+    if (phase === "decider") legend.appendChild(el("span", { class: "chip po", text: tf("stepDeciderPick", { role: role }) }));
+    head.appendChild(legend);
+    if (phase === "decider" && requesterPicks) {
+      var markLegend = el("p", { class: "marklegend" });
+      [["same", t("markLegendSame")], ["memo", t("markLegendMemo")], ["diff", t("markLegendDiff")]].forEach(function (item, index) {
+        if (index) markLegend.appendChild(document.createTextNode(" · "));
+        markLegend.appendChild(el("span", { class: "mk " + item[0], text: item[1] }));
+      });
+      head.appendChild(markLegend);
+    }
+
+    if (phase === "decider" && requesterPicks) {
+      var box = el("div", { class: "po-sum" }, [el("p", { text: tf("requesterDiffSummary", { n: countRequesterDiffers() }) })]);
+      var diffLinks = [];
+      decisions.forEach(function (dec, index) {
+        (dec.parts || []).forEach(function (part) {
+          if (!requesterDiffers(part)) return;
+          diffLinks.push(el("a", { href: "#apq-part-" + part.id, text: (index + 1) + ". " + (part.label || dec.title) }));
+        });
+      });
+      if (diffLinks.length) box.appendChild(el("div", { class: "links" }, diffLinks));
+      head.appendChild(box);
+    }
+
+    /* --- 요약 --- */
+    var sum = el("section", { class: "sumsec" });
+    sum.appendChild(el("h2", { text: t("summaryHead") }));
+    if (phase === "decider" && data.requester_note) {
+      sum.appendChild(el("div", { class: "reqmemo" }, [
+        el("div", { class: "rh", text: t("requesterNoteHead") }),
+        el("p", { text: String(data.requester_note) }),
+      ]));
+    }
+    var noteArea = el("textarea", { id: "apq-note", rows: "3", placeholder: t("notePlaceholder"), "aria-label": t("noteAria") });
+    noteArea.value = state.note || "";
+    noteArea.addEventListener("input", function () {
+      state.note = noteArea.value;
+      update();
+    });
+    sum.appendChild(el("label", { class: "part-label", for: "apq-note", text: t("noteAria") }));
+    sum.appendChild(noteArea);
+    sum.appendChild(el("div", { class: "part-label", text: t("copyTargetHead") }));
+    sum.appendChild(summaryEl);
+    sum.appendChild(el("p", { class: "foot-note", text: t("footNote") }));
+
+    var doc = el("div", { class: "doc" }, [head, cardList, sum]);
+
+    /* --- 레일 --- */
+    var railNext = el("button", { type: "button", class: "btn ghost small", text: t("gotoUnselected") });
+    var toc = el("ul", { class: "toc" });
+    decisions.forEach(function (dec, index) {
+      var dot = el("span", { class: "dot" });
+      ui["dec:" + dec.id].dot = dot;
+      var btn = el("button", { type: "button" }, [
+        el("span", { class: "tnum", text: "D" + (index + 1) }),
+        el("span", { class: "ttitle", text: dec.title || "" }),
+        dot,
+      ]);
+      btn.addEventListener("click", function () {
+        var node = ui["dec:" + dec.id].node;
+        try { node.scrollIntoView({ behavior: "smooth", block: "start" }); } catch (e) { node.scrollIntoView(); }
+      });
+      toc.appendChild(el("li", {}, [btn]));
+    });
+    var railBtns = el("div", { class: "rbtns" }, [railNext]);
+    var railBox = el("div", { class: "rbox" }, [railCount, railPbar, toc, railBtns]);
+    var rail = el("aside", { class: "rail" }, [railBox]);
+
+    /* --- 상단 바(모바일) --- */
+    var mNext = el("button", { type: "button", class: "btn ghost small", text: t("gotoUnselectedShort") });
+    var mbarIn = el("div", { class: "mbar-in" }, [mPbar, mCount, mNext]);
+    var mbar = el("div", { class: "mobilebar" }, [mbarIn]);
+
+    /* --- 필터 --- */
+    var filterInputs = [];
+    function applyFilter(only) {
+      decisions.forEach(function (dec) {
+        var anyVisible = false;
+        (dec.parts || []).forEach(function (part) {
+          var visible = !only || referenceDiffers(part);
+          ui[part.id].anchor.hidden = !visible;
+          if (visible) anyVisible = true;
+        });
+        ui["dec:" + dec.id].node.hidden = !anyVisible;
+      });
+    }
+    function addFilter(host, id) {
+      var input = el("input", { type: "checkbox", id: id });
+      input.addEventListener("change", function () {
+        filterInputs.forEach(function (other) { if (other !== input) other.checked = input.checked; });
+        applyFilter(input.checked);
+      });
+      filterInputs.push(input);
+      host.appendChild(el("label", { class: "filter" }, [input, el("span", { text: t("filterOnlyDifferences") })]));
+    }
+    if (phase === "decider") {
+      addFilter(railBtns, "apq-filter-rail");
+      addFilter(mbarIn, "apq-filter-mobile");
+    }
+
+    /* --- 하단 액션 바 --- */
+    var abBtn = el("button", { type: "button", class: "btn", text: t("copyResult") });
+    abBtn.addEventListener("click", copyText);
+    // 전송이 막히면 이 보조 버튼이 남은 길이라 항상 옆에 둔다
+    var abSubmit = submitMode ? el("button", { type: "button", class: "btn primary", text: t("submitButton") }) : null;
+    if (abSubmit) abSubmit.addEventListener("click", submitReply);
+    var actionbar = el("div", { class: "actionbar" }, [
+      el("div", { class: "ab-in" }, [abCount, el("div", { class: "ab-right" }, [abWarn, abBtn, abSubmit])]),
+    ]);
+
+    /* --- 미선택 항목으로 --- */
+    var cursor = -1;
+    function gotoUnselected() {
+      if (!parts.length) return;
+      for (var i = 1; i <= parts.length; i++) {
+        var index = (cursor + i + parts.length) % parts.length;
+        var x = parts[index];
+        if (state.picks[x.part.id]) continue;
+        cursor = index;
+        var anchor = ui[x.part.id].anchor;
+        try { anchor.scrollIntoView({ behavior: "smooth", block: "center" }); } catch (e) { anchor.scrollIntoView(); }
+        anchor.classList.add("flash");
+        setTimeout(function () { anchor.classList.remove("flash"); }, 1500);
+        return;
+      }
+    }
+    railNext.addEventListener("click", gotoUnselected);
+    mNext.addEventListener("click", gotoUnselected);
+
+    /* --- 조립 --- */
+    root.appendChild(mbar);
+    root.appendChild(el("div", { class: "app" }, [rail, doc]));
+    root.appendChild(actionbar);
+    root.appendChild(toastEl);
+
+    function restore() {
+      Object.keys(state.picks).forEach(function (partId) {
+        var entry = ui[partId];
+        if (!entry) return;
+        var pick = state.picks[partId];
+        if (pick.c === "x") {
+          if (entry.custom) entry.custom.value = pick.x || "";
+          var radioX = entry.radios["x"];
+          if (radioX) radioX.checked = true;
+        } else if (entry.radios[pick.c]) {
+          entry.radios[pick.c].checked = true;
+        }
+      });
+      Object.keys(state.memos || {}).forEach(function (decId) {
+        var entry = ui["dec:" + decId];
+        if (!entry || !entry.node) return;
+        var memo = entry.node.querySelector(".memo textarea");
+        if (!memo) return;
+        memo.value = state.memos[decId] || "";
+        if (String(memo.value).trim()) {
+          memo.hidden = false;
+          var open = entry.node.querySelector(".memo-open");
+          if (open) open.hidden = true;
+        }
+      });
+      noteArea.value = state.note || "";
+    }
+
+    restore();
+    update();
+  }
+
+  if (payload.locked) lockScreen(payload);
+  else if (payload.data) boot(payload.data);
+})();
+</script>
+</body>
+</html>
