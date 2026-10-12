@@ -44,6 +44,8 @@ Object.keys(memos).forEach(function (id) {
   area.value = memos[id];
   fire(area, "input");
 });
+// 모두 고르면 뜨는 토스트는 캡처 시점에 따라 찍히기도 해서 그림마다 결과가 달라진다
+document.querySelectorAll(".toast").forEach(function (node) { node.style.display = "none"; });
 console.log("pickme-page-height:" + Math.ceil(document.documentElement.scrollHeight));
 })();</script>"""
 
@@ -172,8 +174,11 @@ def main(argv):
     ud_root = tempfile.mkdtemp(prefix='pickme-chrome-')
     try:
         html = os.path.join(work_dir, '%s.%s.%s.html' % (demo, lang, theme))
-        result = subprocess.run([sys.executable, RENDER, 'render', src, '--out', html],
-                                capture_output=True, text=True)
+        cmd = [sys.executable, RENDER, 'render', src, '--out', html]
+        if demo == 'requester':
+            # 요청자 단계는 serve.py 가 연 페이지처럼 보여야 해서 전송 주소를 넣는다. 실제로 보내지는 않는다.
+            cmd += ['--submit-url', 'http://127.0.0.1:8765/demo/submit']
+        result = subprocess.run(cmd, capture_output=True, text=True)
         if result.returncode != 0:
             die('%s 렌더 실패: %s' % (demo, (result.stderr or result.stdout).strip()))
 

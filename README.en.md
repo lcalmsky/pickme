@@ -20,11 +20,11 @@
   <a href="#how-it-works">How it works</a>
 </p>
 
-Decisions you cannot make alone pile up. Screen work stalls while you wait for the person who owns the call, and asking them means rewriting the open items into a chat message. pickme turns those items into a single HTML page, takes the requester's and the decider's picks on that page, and returns the result with one copy.
+Decisions you cannot make alone pile up. Screen work stalls while you wait for the person who owns the call, and asking them means rewriting the open items into a chat message. pickme turns those items into a single HTML page, takes the requester's and the decider's picks on that page, and returns the result to the agent.
 
 - **The items and their evidence live on one page.** Each item carries its background, its options, what changes when each one is picked, and the AI recommendation with its reason. The decider can pick without reopening the source document.
 - **Both rounds share one link.** The requester picks first and the decider makes the final pick over it. There is one page file and one data file, and only the data changes between rounds, so the URL does not.
-- **The result comes back with one paste.** The text the page builds carries a selection code, so the agent parses it and fixes what was decided. The requester round opens on a local server, and its `Confirm as requester` button hands the reply straight to the agent.
+- **The result comes back with one button or one paste.** The text the page builds carries a selection code, so the agent parses it and fixes what was decided. The requester round opens on a local server, and its `Confirm as requester` button hands the reply straight to the agent.
 
 <p align="center"><img src="docs/requester.en.png" alt="The requester page" width="800"></p>
 
@@ -116,7 +116,7 @@ Three steps. The agent collects the open decisions and writes the data, the requ
 |---|---|
 | 1. Requester | The page opens on a local server. Picking and pressing `Confirm as requester` hands the reply to the agent |
 | 2. Decider | The same page is published to a shared host or as an Orca artifact. The decider picks and copies the result text back to the requester |
-| 3. Agent | `render.py apply` parses the pasted text, fixes what was decided, and continues the work that was blocked |
+| 3. Agent | `render.py apply` parses the text the decider sent, fixes what was decided, and continues the work that was blocked |
 
 When there is no requester round, put `skip_requester` in the data and publish the decider page directly. The decider's role is free: a PO, a designer, a developer, a QA — whoever owns the call. The role name goes on the screen as written, so use the wording the team uses.
 

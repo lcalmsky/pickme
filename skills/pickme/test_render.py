@@ -428,7 +428,7 @@ class RenderTests(unittest.TestCase):
         proc = run_render("render", str(EXAMPLE), "--out", str(out))
         self.assertEqual(proc.returncode, 0, proc.stderr)
         _, text = payload_of(out)
-        self.assertIn('abCount.textContent = complete ? t("completeBar") : tf("progressSelected", { total: total, done: done });', text)
+        self.assertIn('abCount.textContent = complete ? t(submitMode ? "completeBarSubmit" : "completeBar") : tf("progressSelected", { total: total, done: done });', text)
         self.assertIn('abCount.classList.toggle("ready", complete);', text)
         self.assertIn(".ab-count.ready {", text)
         ready = re.search(r'\.ab-count\.ready\s*\{([^}]*)\}', text)
@@ -438,7 +438,7 @@ class RenderTests(unittest.TestCase):
         # 완료로 바뀌는 순간에만 한 번 알린다
         self.assertIn("var completeSeen = null;", text)
         self.assertIn("if (completeSeen === false && complete) {", text)
-        self.assertIn('toast(t("toastAllPicked"));', text)
+        self.assertIn('toast(t(submitMode ? "toastAllPickedSubmit" : "toastAllPicked"));', text)
         self.assertRegex(text, r'\.actionbar\.pulse\s+\.btn\s*\{[^}]*animation:\s*abpulse')
         self.assertRegex(text, r'@keyframes abpulse\s*\{')
         motion = REDUCED_MOTION_RE.search(text)
@@ -514,6 +514,22 @@ class RenderTests(unittest.TestCase):
         self.assertIn('abCount.textContent = t("submittedMsg");', text)
         self.assertIn("abSubmit.disabled = true;", text)
         self.assertIn("abBtn.disabled = true;", text)
+
+    def test_submit_mode_guidance_points_at_the_submit_button(self):
+        out = self.tmp / "local.html"
+        proc = run_render("render", str(EXAMPLE), "--out", str(out),
+                          "--submit-url", "http://127.0.0.1:8123/tok/submit")
+        self.assertEqual(proc.returncode, 0, proc.stderr)
+        _, text = payload_of(out)
+        for key in ("footNote", "completeBar", "toastAllPicked"):
+            self.assertIn('t(submitMode ? "%sSubmit" : "%s")' % (key, key), text)
+            # 두 언어 모두 전송 버튼 이름을 안내하고 복사를 말하지 않는다
+            for lang, button in (("ko", "요청자 확인"), ("en", "Confirm as requester")):
+                found = re.findall(r'"%sSubmit": "([^"]*)"' % key, text)
+                self.assertEqual(len(found), 2, key)
+                line = found[0] if lang == "ko" else found[1]
+                self.assertIn(button, line)
+                self.assertNotIn("복사" if lang == "ko" else "Copy", line)
 
     def test_submit_url_is_absent_without_the_flag(self):
         out = self.tmp / "plain.html"

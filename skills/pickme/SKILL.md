@@ -1,6 +1,6 @@
 ---
 name: pickme
-description: "Ask someone else — a PO, designer, developer, QA, or anyone who owns the call — to decide open decisions through a shared HTML page: the requester optionally picks first, the AI recommendation is marked, the decider makes the final pick, and a copy button returns the result. Use when the user types /pickme or $pickme, or asks to get decisions from a PO, designer, or another developer."
+description: "Ask someone else — a PO, designer, developer, QA, or anyone who owns the call — to decide open decisions through a shared HTML page: the requester optionally picks first, the AI recommendation is marked, the decider makes the final pick, and the result comes back to the agent. Use when the user types /pickme or $pickme, or asks to get decisions from a PO, designer, or another developer."
 argument-hint: "[topic or ticket key]"
 ---
 

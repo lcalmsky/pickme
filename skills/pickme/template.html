@@ -338,8 +338,10 @@
       "customNoteHead": "{label} 직접 입력",
       "progressOf": "{total}개 중 {done}개",
       "completeBar": "모두 골랐어요. 결과를 복사해 전달해 주세요",
+      "completeBarSubmit": "모두 골랐어요. 요청자 확인을 눌러 주세요",
       "progressSelected": "{total}개 중 {done}개 선택",
       "toastAllPicked": "모두 골랐어요. 아래 결과 복사를 눌러 주세요",
+      "toastAllPickedSubmit": "모두 골랐어요. 아래 요청자 확인을 눌러 주세요",
       "requesterBadge": "요청자",
       "requesterInputPrefix": "요청자 입력: ",
       "aiBadge": "AI 권장",
@@ -373,6 +375,7 @@
       "noteAria": "전체 메모",
       "copyTargetHead": "복사될 내용",
       "footNote": "선택 내용은 이 브라우저에만 임시로 남습니다. 복사한 내용을 상대방에게 전달해 주세요.",
+      "footNoteSubmit": "선택 내용은 이 브라우저에만 임시로 남습니다. 요청자 확인을 누르면 에이전트에 바로 전달됩니다.",
       "gotoUnselected": "미선택 항목으로",
       "gotoUnselectedShort": "미선택으로",
       "filterOnlyDifferences": "다른 항목만 보기",
@@ -423,8 +426,10 @@
       "customNoteHead": "{label} custom input",
       "progressOf": "{done} of {total}",
       "completeBar": "All picked. Copy the result and pass it on",
+      "completeBarSubmit": "All picked. Press Confirm as requester",
       "progressSelected": "{done} of {total} selected",
       "toastAllPicked": "All picked. Press Copy result below",
+      "toastAllPickedSubmit": "All picked. Press Confirm as requester below",
       "requesterBadge": "Requester",
       "requesterInputPrefix": "Requester input: ",
       "aiBadge": "AI recommendation",
@@ -458,6 +463,7 @@
       "noteAria": "Overall memo",
       "copyTargetHead": "What gets copied",
       "footNote": "Your picks stay in this browser only. Pass the copied text on to the other side.",
+      "footNoteSubmit": "Your picks stay in this browser only. Confirm as requester sends them straight to the agent.",
       "gotoUnselected": "Next unpicked",
       "gotoUnselectedShort": "Next unpicked",
       "filterOnlyDifferences": "Only differing items",
@@ -1042,7 +1048,7 @@
       railFill.style.width = pct;
       mFill.style.width = pct;
       var complete = total > 0 && unselected === 0;
-      abCount.textContent = complete ? t("completeBar") : tf("progressSelected", { total: total, done: done });
+      abCount.textContent = complete ? t(submitMode ? "completeBarSubmit" : "completeBar") : tf("progressSelected", { total: total, done: done });
       abCount.classList.toggle("ready", complete);
       abWarn.textContent = unselected > 0 ? tf("unselectedShort", { n: unselected }) : "";
       abBtn.classList.toggle("primary", complete);
@@ -1052,7 +1058,7 @@
         void actionbar.offsetWidth;
         actionbar.classList.add("pulse");
         setTimeout(function () { actionbar.classList.remove("pulse"); }, 520);
-        toast(t("toastAllPicked"));
+        toast(t(submitMode ? "toastAllPickedSubmit" : "toastAllPicked"));
       }
       completeSeen = complete;
       summaryEl.textContent = buildText();
@@ -1288,7 +1294,7 @@
     sum.appendChild(noteArea);
     sum.appendChild(el("div", { class: "part-label", text: t("copyTargetHead") }));
     sum.appendChild(summaryEl);
-    sum.appendChild(el("p", { class: "foot-note", text: t("footNote") }));
+    sum.appendChild(el("p", { class: "foot-note", text: t(submitMode ? "footNoteSubmit" : "footNote") }));
 
     var doc = el("div", { class: "doc" }, [head, cardList, sum]);
 
