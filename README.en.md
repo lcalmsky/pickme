@@ -1,4 +1,4 @@
-<h1 align="center">stampede</h1>
+<h1 align="center"><img src="docs/logo.png" alt="stampede" width="420"></h1>
 
 <p align="center"><a href="README.md">한국어</a> · <b>English</b></p>
 
